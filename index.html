@@ -26,7 +26,7 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 #loc{height:520vh;position:relative}
 #map{position:absolute;inset:0}
 #map gmp-map-3d{width:100%;height:100%;display:block}
-#render{position:absolute;inset:0;opacity:0;background:#000 center/cover no-repeat url(render_ulica.jpg);pointer-events:none}
+#render{position:absolute;inset:0;opacity:0;background:#000 center/cover no-repeat url(ulica_susedi.jpg);pointer-events:none}
 @media (max-aspect-ratio:1/1){#render{background-size:contain;background-color:#0b0d10}}
 .lab{position:absolute;left:16px;right:16px;bottom:28px;max-width:420px;background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;padding:18px 20px;transition:opacity .35s;opacity:0}
 .lab small{color:var(--acc);letter-spacing:.14em;font-size:11px;font-weight:600}
@@ -51,9 +51,9 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
   <div id="hint">SKROLUJ ↓</div></div></section>
 
 <section id="loc"><div class="stick"><div id="map"></div><div id="render"></div><div class="bar" id="bar2"></div>
-  <div class="lab" id="l1"><small>01 · BEOGRAD</small><h2>Zemun, na obali Dunava</h2><p>Deset minuta od Novog Beograda i centra grada.</p></div>
-  <div class="lab" id="l2"><small>02 · ZEMUN</small><h2>Ulica Cara Dušana</h2><p>Mirna ulica, nekoliko minuta od Glavne ulice, pijace i keja.</p></div>
-  <div class="lab" id="l3"><small>03 · PARCELA</small><h2>Ovde niče zgrada</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom.</p></div>
+  <div class="lab" id="l1"><small>01 · ZEMUN</small><h2>Cara Dušana, Zemun</h2><p>Nekoliko minuta od Glavne ulice, pijace i Dunava.</p></div>
+  <div class="lab" id="l2"><small>02 · PARCELA</small><h2>Ovde niče zgrada</h2><p>Između postojećih kuća, u ulici Cara Dušana.</p></div>
+  <div class="lab" id="l3"><small>03 · CARA DUŠANA 103</small><h2>Ovako će izgledati</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom.</p></div>
 </div></section>
 
 <section id="near"><small>04 · U BLIZINI</small><h2>Sve na par minuta</h2><ul class="poi" id="poi"></ul>
@@ -67,7 +67,7 @@ function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv
 function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
   if(!m||!m.naturalWidth)return;const W=cv.width,H=cv.height,iw=m.naturalWidth,ih=m.naturalHeight,sc=Math.max(W/iw,H/ih),sf=Math.min(W/iw,H/ih);
   if(W/H>=1.2){cx.drawImage(m,(W-iw*sc)/2,(H-ih*sc)/2,iw*sc,ih*sc);return}
-  cx.filter='blur(24px) brightness(.55)';cx.drawImage(m,(W-iw*sc)/2,(H-ih*sc)/2,iw*sc,ih*sc);cx.filter='none';
+  cx.fillStyle='#000';cx.fillRect(0,0,W,H);
   const w=iw*sf,h=ih*sf;cx.drawImage(m,(W-w)/2,H*.38-h/2,w,h)}
 let tgt=0,pos=0;function onS(){const r=hero.getBoundingClientRect(),t=Math.min(1,Math.max(0,-r.top/(r.height-innerHeight)));tgt=t;
   document.getElementById('cap').style.opacity=t<.2?1:Math.max(0,1-(t-.2)*5);document.getElementById('hint').style.opacity=t<.03?1:0;document.getElementById('bar1').style.width=(t*100)+'%'}
@@ -99,13 +99,13 @@ document.getElementById('poi').innerHTML=POIS.map(p=>{const d=dist(SITE,p)*1.25;
   let GZ=90;
   try{const {ElevationService}=await google.maps.importLibrary('elevation');const e=await new ElevationService().getElevationForLocations({locations:[SITE]});if(e.results&&e.results[0])GZ=e.results[0].elevation}catch(e){}
 
-  const endHead=(face+180+28)%360;
+  const endHead=(face+180)%360;
   const KEYS=[
-    {t:0,  r:9000,tilt:35,h:endHead-70,c:{lat:44.835,lng:20.42}},
-    {t:.35,r:2600,tilt:50,h:endHead-35,c:{lat:44.848,lng:20.402}},
-    {t:.7, r:520, tilt:66,h:endHead-10,c:SITE},
-    {t:.9, r:150, tilt:78,h:endHead,   c:SITE},
-    {t:1,  r:130, tilt:80,h:endHead,   c:SITE}];
+    {t:0,  r:2400,tilt:40,h:endHead-50,c:SITE},
+    {t:.4, r:700, tilt:58,h:endHead-25,c:SITE},
+    {t:.75,r:160, tilt:76,h:endHead-6, c:SITE},
+    {t:.92,r:70,  tilt:86,h:endHead,   c:SITE},
+    {t:1,  r:62,  tilt:88,h:endHead,   c:SITE}];
   const map=new Map3DElement({center:{...KEYS[0].c,altitude:GZ},range:KEYS[0].r,tilt:KEYS[0].tilt,heading:KEYS[0].h,mode:'SATELLITE'});
   try{map.defaultUIHidden=true}catch(_){}
   document.getElementById('map').append(map);
@@ -116,12 +116,12 @@ document.getElementById('poi').innerHTML=POIS.map(p=>{const d=dist(SITE,p)*1.25;
   function onS(){const r=loc.getBoundingClientRect();tgt=cl(-r.top/(r.height-innerHeight))}
   addEventListener('scroll',onS,{passive:true});onS();
   function cam(t){let i=0;while(i<KEYS.length-2&&t>KEYS[i+1].t)i++;const A=KEYS[i],B=KEYS[i+1],u=ease(cl((t-A.t)/(B.t-A.t)));
-    map.center={lat:lerp(A.c.lat,B.c.lat,u),lng:lerp(A.c.lng,B.c.lng,u),altitude:GZ+lerp(0,8,cl(t/.9))};
+    map.center={lat:lerp(A.c.lat,B.c.lat,u),lng:lerp(A.c.lng,B.c.lng,u),altitude:GZ+lerp(0,11,cl(t/.9))};
     map.range=Math.exp(lerp(Math.log(A.r),Math.log(B.r),u));map.tilt=lerp(A.tilt,B.tilt,u);map.heading=lerp(A.h,B.h,u);}
   (function loop(){
     if(Math.abs(tgt-pos)>.0005){pos=pos<0?tgt:pos+(tgt-pos)*.12;cam(pos);
-      rd.style.opacity=cl((pos-.82)/.13);
-      labs[0].style.opacity=pos<.3?1:0;labs[1].style.opacity=pos>=.3&&pos<.66?1:0;labs[2].style.opacity=pos>=.66?1:0;
+      rd.style.opacity=cl((pos-.84)/.12);
+      labs[0].style.opacity=pos<.35?1:0;labs[1].style.opacity=pos>=.35&&pos<.84?1:0;labs[2].style.opacity=pos>=.9?1:0;
       document.getElementById('bar2').style.width=(pos*100)+'%';}
     requestAnimationFrame(loop)})();
 })().catch(e=>err(e.message||e));
