@@ -9,12 +9,22 @@
 :root{--bg:#0b0d10;--ink:#f3f1ec;--mute:#b4b8be;--acc:#e8b86a;--card:rgba(14,16,20,.74);--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
-#map{position:fixed;inset:0}
+#map{position:sticky;top:0;height:100vh;width:100%}
+#loc{position:relative}
+#hero{height:420vh;position:relative}
+#hero .stick{position:sticky;top:0;height:100vh;overflow:hidden;background:#000}
+#hero canvas{width:100%;height:100%;display:block;object-fit:cover}
+#hero .cap{position:absolute;left:0;right:0;bottom:0;padding:0 24px 64px;background:linear-gradient(transparent,rgba(0,0,0,.7));transition:opacity .4s}
+#hero .cap small{color:var(--acc);letter-spacing:.16em;font-size:12px;font-weight:600}
+#hero .cap h1{margin:8px 0 6px;font-size:clamp(30px,5vw,56px);line-height:1.05}
+#hero .cap p{margin:0;color:#ddd;font-size:16px;max-width:520px}
+#hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:12px;letter-spacing:.14em;color:#ccc}
+#bar{position:absolute;left:0;top:0;height:3px;background:var(--acc);width:0}
 #map gmp-map-3d{width:100%;height:100%;display:block}
 header{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:linear-gradient(rgba(0,0,0,.55),transparent);pointer-events:none}
 header b{font-weight:700;letter-spacing:.04em}
 header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px solid var(--acc);padding:3px 8px;border-radius:20px}
-#story{position:relative;z-index:4;pointer-events:none}
+#story{position:relative;z-index:4;pointer-events:none;margin-top:-100vh}
 .step{min-height:100vh;display:flex;align-items:center;padding:0 16px}
 .card{pointer-events:auto;max-width:380px;background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
 .card small{color:var(--acc);letter-spacing:.14em;font-size:11px;font-weight:600}
@@ -31,17 +41,31 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 </style>
 </head>
 <body>
-<div id="map"></div>
 <header><b>CARA DUŠANA 103 · ZEMUN</b><span>KONCEPT</span></header>
+<section id="hero"><div class="stick"><canvas id="cv"></canvas><div id="bar"></div>
+<div class="cap" id="cap"><small>NOVI STAMBENI PROJEKAT · ZEMUN</small><h1>Cara Dušana 103</h1><p>Šest nivoa, balkoni u zelenilu i toplo svetlo u sumrak. Početak gradnje novembar 2026.</p></div>
+<div id="hint">SKROLUJ ↓</div></div></section>
+<section id="loc"><div id="map"></div>
 <div id="story">
   <section class="step" data-stop="zemun"><div class="card"><small>01 · ZEMUN</small><h2>Mirna ulica, blizu svega</h2><p>Parcela je u ulici Cara Dušana u Zemunu, nekoliko minuta od Glavne ulice, pijace i Dunava.</p></div></section>
   <section class="step" data-stop="site"><div class="card"><small>02 · PARCELA</small><h2>Ovde niče zgrada</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom. Pogled kruži oko parcele, a možeš i sam da ga okreneš.</p></div></section>
   <section class="step" data-stop="near"><div class="card"><small>03 · U BLIZINI</small><h2>Šta je u blizini</h2><p>Okvirno vreme po vazdušnoj liniji. Klikni na mesto da ga vidiš.</p><ul class="poi" id="poi"></ul></div></section>
   <section class="step" style="min-height:60vh"></section>
-</div>
+</div></section>
 <div id="tools"><button id="b360">360°</button></div>
 
 <div id="err"></div>
+<script>
+(()=>{const N=121,imgs=[],cv=document.getElementById('cv'),cx=cv.getContext('2d'),hero=document.getElementById('hero');let cur=-1;
+for(let i=1;i<=N;i++){const im=new Image();im.src='frames/f'+String(i).padStart(3,'0')+'.jpg';if(i===1)im.onload=()=>draw(0);imgs.push(im)}
+function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
+function draw(k){const im=imgs[k];if(!im||!im.complete||!im.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){k=j;break}}
+  const m=imgs[k];if(!m.naturalWidth)return;const s=Math.max(cv.width/m.naturalWidth,cv.height/m.naturalHeight),w=m.naturalWidth*s,h=m.naturalHeight*s;cx.drawImage(m,(cv.width-w)/2,(cv.height-h)/2,w,h)}
+let tgt=0,pos=0;function onS(){const r=hero.getBoundingClientRect(),t=Math.min(1,Math.max(0,-r.top/(r.height-innerHeight)));tgt=t;
+  document.getElementById('cap').style.opacity=t<.15?1:Math.max(0,1-(t-.15)*6);document.getElementById('hint').style.opacity=t<.03?1:0;document.getElementById('bar').style.width=(t*100)+'%';const tl=document.getElementById('tools');if(tl)tl.style.display=r.bottom>innerHeight*.5?'none':'flex'}
+function loop(){pos+=(tgt-pos)*.18;const k=Math.round(pos*(N-1));if(k!==cur){cur=k;draw(k)}requestAnimationFrame(loop)}
+addEventListener('resize',()=>{size();draw(Math.max(0,cur))});addEventListener('scroll',onS,{passive:true});size();onS();loop();})();
+</script>
 
 <script>
 (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key:"AIzaSyA7obGqf-l7HMHyqDRBrFQKEs_s5TliWYs",v:"beta",language:"sr-Latn",region:"RS"});
