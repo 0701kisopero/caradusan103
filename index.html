@@ -79,10 +79,8 @@ ts.tileLoadProgressEvent.addEventListener((n)=>{pend=n;ld.style.opacity=n>0?1:0;
 const waitTiles=()=>new Promise(r=>{let ok=0;const iv=setInterval(()=>{if(ts.tilesLoaded&&++ok>3){clearInterval(iv);r()}else if(!ts.tilesLoaded)ok=0},250);setTimeout(()=>{clearInterval(iv);r()},20000)});
 
 // --- location (geocoded, then saved override) ---
-let SITE={lon:20.3992,lat:44.8428};
-try{const s=JSON.parse(localStorage.getItem('cd103pin')||'null');if(s)SITE=s;else throw 0}catch(_){
-  try{const g=new C.IonGeocoderService({scene,geocodeProviderType:C.IonGeocodeProviderType.GOOGLE});const r=await g.geocode('Cara Dušana 103, Zemun, Beograd');
-    if(r&&r.length){const d=r[0].destination;const c=d instanceof C.Rectangle?C.Rectangle.center(d):C.Cartographic.fromCartesian(d);SITE={lon:C.Math.toDegrees(c.longitude),lat:C.Math.toDegrees(c.latitude)}}}catch(e){}
+let SITE={lon:20.393542,lat:44.853322};
+try{const s=JSON.parse(localStorage.getItem('cd103pin2')||'null');if(s)SITE=s;else throw 0}catch(_){
 }
 const GROUND_GUESS=118;
 async function groundH(lon,lat){
@@ -136,7 +134,7 @@ const STOPS={
   city:()=>flyRange(C.Cartesian3.fromDegrees(20.43,44.825,120),20,-30,9000,3),
   zemun:()=>flyRange(siteC(),35,-38,1500),
   site:()=>{flyRange(siteC(),35,-24,orbitR,2.6);setTimeout(()=>{if(cur==='site')startOrbit()},2800)},
-  near:()=>flyRange(C.Cartesian3.fromDegrees((SITE.lon+20.4105)/2,(SITE.lat+44.845)/2,120),20,-45,2300)
+  near:()=>flyRange(C.Cartesian3.fromDegrees((SITE.lon+20.4105)/2,(SITE.lat+44.847)/2,120),20,-45,2300)
 };
 function go(k){if(cur===k)return;cur=k;poiEnts.forEach(e=>e&&(e.show=k==='near'));STOPS[k]()}
 function flyPoi(i){const p=POIS[i];flyRange(C.Cartesian3.fromDegrees(p.lon,p.lat,gH),0,-35,p.car?2500:500)}
@@ -158,7 +156,7 @@ document.getElementById('bPin').onclick=e=>{pinMode=!pinMode;e.target.classList.
 h.setInputAction(async ev=>{
   if(!pinMode)return;const p=scene.pickPosition(ev.position);if(!p)return;
   const c=C.Cartographic.fromCartesian(p);SITE={lon:+C.Math.toDegrees(c.longitude).toFixed(6),lat:+C.Math.toDegrees(c.latitude).toFixed(6)};
-  try{localStorage.setItem('cd103pin',JSON.stringify(SITE))}catch(_){}
+  try{localStorage.setItem('cd103pin2',JSON.stringify(SITE))}catch(_){}
   pinMode=false;document.getElementById('bPin').classList.remove('on');
   await placeSite();renderPois();msg('Pin pomeren: '+SITE.lat+', '+SITE.lon,6000);
 },C.ScreenSpaceEventType.LEFT_CLICK);
