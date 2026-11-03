@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lokacija Cara Dušana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d10;--ink:#f3f1ec;--mute:#a9adb3;--acc:#e8b86a;--card:rgba(14,16,20,.72);--line:rgba(255,255,255,.12)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0b0d10}}
+:root[data-theme="dark"]{--bg:#0b0d10}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+#map{position:fixed;inset:0}
+#map .cesium-widget,#map .cesium-widget canvas{width:100%;height:100%;display:block}
+.cesium-widget-credits{position:absolute;left:8px;bottom:6px;font-size:10px;color:#ddd;opacity:.85;z-index:3;max-width:70%}
+.cesium-widget-credits a{color:#ddd}
+.cesium-credit-logoContainer img{height:14px;vertical-align:middle}
+.cesium-viewer-bottom{position:absolute;left:0;bottom:0}
+.cesium-credit-lightbox-overlay{display:none!important}
+header{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:linear-gradient(rgba(0,0,0,.55),transparent);pointer-events:none}
+header b{font-weight:700;letter-spacing:.04em}
+header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px solid var(--acc);padding:3px 8px;border-radius:20px}
+#story{position:relative;z-index:4;pointer-events:none}
+.step{min-height:100vh;display:flex;align-items:center;padding:0 16px}
+.card{pointer-events:auto;max-width:380px;background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.card small{color:var(--acc);letter-spacing:.14em;font-size:11px;font-weight:600}
+.card h2{margin:6px 0 8px;font-size:24px;line-height:1.2}
+.card p{margin:0;color:var(--mute);line-height:1.55;font-size:14.5px}
+.poi{list-style:none;margin:12px 0 0;padding:0}
+.poi li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:14px;cursor:pointer}
+.poi li:hover{color:var(--acc)}
+.poi em{font-style:normal;color:var(--mute);white-space:nowrap}
+#tools{position:fixed;right:14px;bottom:18px;z-index:6;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#tools button{font:500 13px Inter,sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:22px;padding:9px 14px;cursor:pointer;backdrop-filter:blur(8px)}
+#tools button.on{border-color:var(--acc);color:var(--acc)}
+#msg{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:7;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;display:none;max-width:92vw;text-align:center}
+#err{position:fixed;inset:0;z-index:8;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;background:var(--bg)}
+@media (max-width:640px){.step{align-items:flex-end;padding-bottom:90px}.card{max-width:none;width:100%}.card h2{font-size:20px}}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<header><b>CARA DUŠANA 103 · ZEMUN</b><span>KONCEPT</span></header>
+
+<div id="story">
+  <section class="step" data-stop="city"><div class="card"><small>01 · BEOGRAD</small><h2>Na ušću Save i Dunava</h2><p>Zemun je stari deo Beograda na obali Dunava, deset minuta vožnje od Novog Beograda i centra grada.</p></div></section>
+  <section class="step" data-stop="zemun"><div class="card"><small>02 · ZEMUN</small><h2>Mirna ulica, blizu svega</h2><p>Parcela je u ulici Cara Dušana, nekoliko minuta od Glavne ulice, pijace i keja.</p></div></section>
+  <section class="step" data-stop="site"><div class="card"><small>03 · PARCELA</small><h2>Ovde niče zgrada</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom. Okreni pogled prstom ili mišem.</p></div></section>
+  <section class="step" data-stop="near"><div class="card"><small>04 · U BLIZINI</small><h2>Šta je u blizini</h2><p>Vreme je procena peške po vazdušnoj liniji. Klikni na mesto da ga vidiš na mapi.</p><ul class="poi" id="poi"></ul></div></section>
+  <section class="step" style="min-height:60vh"></section>
+</div>
+
+<div id="tools"><button id="bOrbit">360°</button><button id="bPin">Pomeri pin</button></div>
+<div id="msg"></div>
+<div id="err"><p>3D mapa nije mogla da se učita u ovom pregledaču.<br><span style="color:var(--mute)" id="errd"></span></p></div>
+
+<script>window.CESIUM_BASE_URL='https://cdn.jsdelivr.net/npm/cesium@1.140.0/Build/Cesium/';</script>
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.140.0/Build/Cesium/Cesium.js"></script>
+<script>
+(async function(){
+const TOKEN='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6Ik4ydVkxUlpneUdtaHNXS1kiLCJqdGkiOiIyMGE1ZWFmNi04Mjk0LTRkY2UtYjc5Ni1jMzQxNTRiZWU4OWQiLCJpZCI6NTQyMDYxLCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3OTM3Mzg0NDR9.Fz-8CEvt3_NSJICL9Gz31BDNM1O-v3ZYKUCjX2XJsr0';
+const msg=(t,ms)=>{const m=document.getElementById('msg');m.innerHTML=t;m.style.display='block';clearTimeout(msg._t);if(ms)msg._t=setTimeout(()=>m.style.display='none',ms)};
+const fail=e=>{document.getElementById('err').style.display='flex';document.getElementById('errd').textContent=String(e&&e.message||e)};
+if(!window.Cesium){fail('Cesium biblioteka se nije učitala.');return}
+const C=Cesium;C.Ion.defaultAccessToken=TOKEN;
+
+let viewer;
+try{
+  viewer=new C.Viewer('map',{baseLayer:false,baseLayerPicker:false,geocoder:false,homeButton:false,sceneModePicker:false,navigationHelpButton:false,animation:false,timeline:false,fullscreenButton:false,infoBox:false,selectionIndicator:false,requestRenderMode:false});
+}catch(e){fail(e);return}
+const scene=viewer.scene;scene.globe.show=false;scene.skyAtmosphere.show=true;
+viewer.clock.currentTime=C.JulianDate.fromIso8601('2026-06-21T16:30:00Z');
+try{const ts=await C.createGooglePhotorealistic3DTileset({onlyUsingWithGoogleGeocoder:true});scene.primitives.add(ts);}catch(e){fail(e);return}
+
+// --- location (geocoded, then saved override) ---
+let SITE={lon:20.3992,lat:44.8428};
+try{const s=JSON.parse(localStorage.getItem('cd103pin')||'null');if(s)SITE=s;else throw 0}catch(_){
+  try{const g=new C.IonGeocoderService({scene,geocodeProviderType:C.IonGeocodeProviderType.GOOGLE});const r=await g.geocode('Cara Dušana 103, Zemun, Beograd');
+    if(r&&r.length){const d=r[0].destination;const c=d instanceof C.Rectangle?C.Rectangle.center(d):C.Cartographic.fromCartesian(d);SITE={lon:C.Math.toDegrees(c.longitude),lat:C.Math.toDegrees(c.latitude)}}}catch(e){}
+}
+const GROUND_GUESS=118;
+async function groundH(lon,lat){
+  try{const p=await scene.sampleHeightMostDetailed([C.Cartographic.fromDegrees(lon,lat)]);if(p[0]&&isFinite(p[0].height))return p[0].height}catch(e){}
+  return GROUND_GUESS;
+}
+let gH=GROUND_GUESS;
+const pin=viewer.entities.add({position:C.Cartesian3.fromDegrees(SITE.lon,SITE.lat,gH+40),
+  billboard:{image:pinSvg(),width:44,height:56,verticalOrigin:C.VerticalOrigin.BOTTOM,disableDepthTestDistance:Number.POSITIVE_INFINITY},
+  label:{text:'Cara Dušana 103',font:'600 15px Inter, sans-serif',fillColor:C.Color.WHITE,outlineColor:C.Color.fromCssColorString('#111'),outlineWidth:4,style:C.LabelStyle.FILL_AND_OUTLINE,pixelOffset:new C.Cartesian2(0,-64),verticalOrigin:C.VerticalOrigin.BOTTOM,disableDepthTestDistance:Number.POSITIVE_INFINITY}});
+const ring=viewer.entities.add({position:C.Cartesian3.fromDegrees(SITE.lon,SITE.lat,gH),
+  ellipse:{semiMajorAxis:16,semiMinorAxis:16,height:gH+0.5,material:C.Color.fromCssColorString('#e8b86a').withAlpha(.35),outline:false}});
+async function placeSite(){
+  gH=await groundH(SITE.lon,SITE.lat);
+  pin.position=C.Cartesian3.fromDegrees(SITE.lon,SITE.lat,gH+40);
+  ring.position=C.Cartesian3.fromDegrees(SITE.lon,SITE.lat,gH);ring.ellipse.height=gH+1.2;
+}
+function pinSvg(){const s='<svg xmlns="http://www.w3.org/2000/svg" width="44" height="56" viewBox="0 0 44 56"><path d="M22 55C22 55 3 33 3 21a19 19 0 0 1 38 0c0 12-19 34-19 34z" fill="#e8b86a" stroke="#1a1a1a" stroke-width="2"/><circle cx="22" cy="21" r="7" fill="#1a1a1a"/></svg>';return 'data:image/svg+xml;base64,'+btoa(s)}
+
+// --- nearby places ---
+const POIS=[
+  {n:'Glavna ulica, Zemun',q:'Glavna, Zemun',lon:20.4113,lat:44.8434},
+  {n:'Zemunska pijaca',q:'Zemunska pijaca',lon:20.4099,lat:44.8443},
+  {n:'Kej oslobođenja (Dunav)',q:'Kej oslobođenja, Zemun',lon:20.4142,lat:44.8462},
+  {n:'Gardoš kula',q:'Kula Sibinjanin Janka, Zemun',lon:20.4097,lat:44.8487},
+  {n:'Ušće, Novi Beograd',q:'Ušće Shopping Center, Beograd',lon:20.4366,lat:44.8159,car:true}
+];
+const R=6371000,rad=d=>d*Math.PI/180;
+const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lon-a.lon);const h=Math.sin(dl/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const poiEnts=[];
+function renderPois(){
+  const ul=document.getElementById('poi');ul.innerHTML='';
+  POIS.forEach((p,i)=>{const d=dist(SITE,p)*1.25;const t=p.car?Math.max(3,Math.round(d/1000/25*60))+' min kolima':Math.max(1,Math.round(d/1000/4.8*60))+' min peške';
+    const li=document.createElement('li');li.innerHTML=p.n+'<em>'+t+'</em>';li.onclick=()=>flyPoi(i);ul.appendChild(li);
+    if(!poiEnts[i])poiEnts[i]=viewer.entities.add({position:C.Cartesian3.fromDegrees(p.lon,p.lat,GROUND_GUESS+25),show:false,
+      point:{pixelSize:12,color:C.Color.WHITE,outlineColor:C.Color.fromCssColorString('#e8b86a'),outlineWidth:3,disableDepthTestDistance:Number.POSITIVE_INFINITY},
+      label:{text:p.n,font:'500 14px Inter, sans-serif',fillColor:C.Color.WHITE,outlineColor:C.Color.BLACK,outlineWidth:4,style:C.LabelStyle.FILL_AND_OUTLINE,pixelOffset:new C.Cartesian2(0,-18),disableDepthTestDistance:Number.POSITIVE_INFINITY}});
+  });
+}
+async function settlePois(){for(const p of POIS){const h=await groundH(p.lon,p.lat);const i=POIS.indexOf(p);poiEnts[i].position=C.Cartesian3.fromDegrees(p.lon,p.lat,h+20)}}
+
+// --- camera ---
+let orbit=false,orbitH=0,orbitR=260,orbitP=-25,cur=null;
+function siteC(){return C.Cartesian3.fromDegrees(SITE.lon,SITE.lat,gH+10)}
+function stopOrbit(){if(orbit){orbit=false;viewer.camera.lookAtTransform(C.Matrix4.IDENTITY);document.getElementById('bOrbit').classList.remove('on')}}
+function flyRange(center,h,p,r,dur){
+  stopOrbit();
+  viewer.camera.flyToBoundingSphere(new C.BoundingSphere(center,1),{offset:new C.HeadingPitchRange(rad(h),rad(p),r),duration:dur??2.6,easingFunction:C.EasingFunction.QUADRATIC_IN_OUT});
+}
+const STOPS={
+  city:()=>flyRange(C.Cartesian3.fromDegrees(20.43,44.825,120),20,-30,9000,3),
+  zemun:()=>flyRange(siteC(),35,-38,1500),
+  site:()=>{flyRange(siteC(),35,-24,orbitR,2.6);setTimeout(()=>{if(cur==='site')startOrbit()},2800)},
+  near:()=>flyRange(C.Cartesian3.fromDegrees((SITE.lon+20.4105)/2,(SITE.lat+44.845)/2,120),20,-45,2300)
+};
+function go(k){if(cur===k)return;cur=k;poiEnts.forEach(e=>e&&(e.show=k==='near'));STOPS[k]()}
+function flyPoi(i){const p=POIS[i];flyRange(C.Cartesian3.fromDegrees(p.lon,p.lat,gH),0,-35,p.car?2500:500)}
+function startOrbit(){
+  const hpr=viewer.camera.heading;orbitH=hpr;orbit=true;document.getElementById('bOrbit').classList.add('on');
+}
+viewer.clock.onTick.addEventListener(()=>{
+  if(!orbit)return;orbitH+=0.0025;
+  viewer.camera.lookAt(siteC(),new C.HeadingPitchRange(orbitH,rad(orbitP),orbitR));
+});
+const h=new C.ScreenSpaceEventHandler(scene.canvas);
+h.setInputAction(()=>stopOrbit(),C.ScreenSpaceEventType.LEFT_DOWN);
+h.setInputAction(()=>stopOrbit(),C.ScreenSpaceEventType.WHEEL);
+document.getElementById('bOrbit').onclick=()=>{if(orbit){stopOrbit()}else{cur='site';flyRange(siteC(),C.Math.toDegrees(viewer.camera.heading),orbitP,orbitR,1.6);setTimeout(startOrbit,1700)}};
+
+// --- move pin ---
+let pinMode=false;
+document.getElementById('bPin').onclick=e=>{pinMode=!pinMode;e.target.classList.toggle('on',pinMode);msg(pinMode?'Klikni na mapi tačno gde je parcela.':'',pinMode?0:1)};
+h.setInputAction(async ev=>{
+  if(!pinMode)return;const p=scene.pickPosition(ev.position);if(!p)return;
+  const c=C.Cartographic.fromCartesian(p);SITE={lon:+C.Math.toDegrees(c.longitude).toFixed(6),lat:+C.Math.toDegrees(c.latitude).toFixed(6)};
+  try{localStorage.setItem('cd103pin',JSON.stringify(SITE))}catch(_){}
+  pinMode=false;document.getElementById('bPin').classList.remove('on');
+  await placeSite();renderPois();msg('Pin pomeren: '+SITE.lat+', '+SITE.lon,6000);
+},C.ScreenSpaceEventType.LEFT_CLICK);
+
+// --- init ---
+renderPois();
+viewer.camera.setView({destination:C.Cartesian3.fromDegrees(20.43,44.70,14000),orientation:{heading:rad(20),pitch:rad(-35)}});
+await new Promise(r=>setTimeout(r,800));
+go('city');
+setTimeout(async()=>{await placeSite();settlePois()},3500);
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.target.dataset.stop)go(e.target.dataset.stop)}),{threshold:.55});
+document.querySelectorAll('.step[data-stop]').forEach(s=>io.observe(s));
+})();
+</script>
+</body>
+</html>
