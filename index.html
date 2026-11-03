@@ -54,6 +54,7 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 
 <div id="tools"><button id="bOrbit">360°</button><button id="bPin">Pomeri pin</button></div>
 <div id="msg"></div>
+<div id="load" style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:7;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:13px;transition:opacity .4s;opacity:1;pointer-events:none"><b style="font-weight:500">Učitavam 3D snimke…</b></div>
 <div id="err"><p>3D mapa nije mogla da se učita u ovom pregledaču.<br><span style="color:var(--mute)" id="errd"></span></p></div>
 
 <script>window.CESIUM_BASE_URL='https://cdn.jsdelivr.net/npm/cesium@1.140.0/Build/Cesium/';</script>
@@ -70,9 +71,12 @@ let viewer;
 try{
   viewer=new C.Viewer('map',{baseLayer:false,baseLayerPicker:false,geocoder:false,homeButton:false,sceneModePicker:false,navigationHelpButton:false,animation:false,timeline:false,fullscreenButton:false,infoBox:false,selectionIndicator:false,requestRenderMode:false});
 }catch(e){fail(e);return}
-const scene=viewer.scene;scene.globe.show=false;scene.skyAtmosphere.show=true;
+const scene=viewer.scene;scene.globe.show=false;scene.fog.enabled=false;scene.skyAtmosphere.show=true;
 viewer.clock.currentTime=C.JulianDate.fromIso8601('2026-06-21T16:30:00Z');
-try{const ts=await C.createGooglePhotorealistic3DTileset({onlyUsingWithGoogleGeocoder:true});scene.primitives.add(ts);}catch(e){fail(e);return}
+let ts;try{ts=await C.createGooglePhotorealistic3DTileset({onlyUsingWithGoogleGeocoder:true},{maximumScreenSpaceError:6,dynamicScreenSpaceError:false,foveatedScreenSpaceError:false,skipLevelOfDetail:false,cacheBytes:1024*1024*1024});scene.primitives.add(ts);}catch(e){fail(e);return}
+const ld=document.getElementById('load');let pend=0;
+ts.tileLoadProgressEvent.addEventListener((n)=>{pend=n;ld.style.opacity=n>0?1:0;ld.querySelector('b').textContent=n>0?('Učitavam 3D snimke… ('+n+')'):''});
+const waitTiles=()=>new Promise(r=>{let ok=0;const iv=setInterval(()=>{if(ts.tilesLoaded&&++ok>3){clearInterval(iv);r()}else if(!ts.tilesLoaded)ok=0},250);setTimeout(()=>{clearInterval(iv);r()},20000)});
 
 // --- location (geocoded, then saved override) ---
 let SITE={lon:20.3992,lat:44.8428};
@@ -126,7 +130,7 @@ function siteC(){return C.Cartesian3.fromDegrees(SITE.lon,SITE.lat,gH+10)}
 function stopOrbit(){if(orbit){orbit=false;viewer.camera.lookAtTransform(C.Matrix4.IDENTITY);document.getElementById('bOrbit').classList.remove('on')}}
 function flyRange(center,h,p,r,dur){
   stopOrbit();
-  viewer.camera.flyToBoundingSphere(new C.BoundingSphere(center,1),{offset:new C.HeadingPitchRange(rad(h),rad(p),r),duration:dur??2.6,easingFunction:C.EasingFunction.QUADRATIC_IN_OUT});
+  viewer.camera.flyToBoundingSphere(new C.BoundingSphere(center,1),{offset:new C.HeadingPitchRange(rad(h),rad(p),r),duration:dur??4,easingFunction:C.EasingFunction.QUADRATIC_IN_OUT});
 }
 const STOPS={
   city:()=>flyRange(C.Cartesian3.fromDegrees(20.43,44.825,120),20,-30,9000,3),
@@ -161,8 +165,6 @@ h.setInputAction(async ev=>{
 
 // --- init ---
 renderPois();
-viewer.camera.setView({destination:C.Cartesian3.fromDegrees(20.43,44.70,14000),orientation:{heading:rad(20),pitch:rad(-35)}});
-await new Promise(r=>setTimeout(r,800));
 go('city');
 setTimeout(async()=>{await placeSite();settlePois()},3500);
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.target.dataset.stop)go(e.target.dataset.stop)}),{threshold:.55});
