@@ -79,7 +79,7 @@ const scene=viewer.scene;scene.globe.show=false;scene.fog.enabled=false;scene.sk
 viewer.clock.currentTime=C.JulianDate.fromIso8601('2026-06-21T16:30:00Z');
 let ts;try{ts=await C.createGooglePhotorealistic3DTileset({onlyUsingWithGoogleGeocoder:true},{maximumScreenSpaceError:6,dynamicScreenSpaceError:false,foveatedScreenSpaceError:false,skipLevelOfDetail:false,cacheBytes:1024*1024*1024});scene.primitives.add(ts);}catch(e){fail(e);return}
 const ld=document.getElementById('load');let pend=0;
-ts.tileLoadProgressEvent.addEventListener((n)=>{pend=n;const ct=document.getElementById('coverT');if(ct)ct.textContent='Učitavam 3D snimke Zemuna… '+(n>0?n:'');ld.style.opacity=n>0?1:0;ld.querySelector('b').textContent=n>0?('Učitavam 3D snimke… ('+n+')'):''});
+ts.loadProgress.addEventListener((a,b)=>{const n=a+b;pend=n;const ct=document.getElementById('coverT');if(ct)ct.textContent='Učitavam 3D snimke Zemuna… '+(n>0?n:'');ld.style.opacity=n>0?1:0;ld.querySelector('b').textContent=n>0?('Učitavam 3D snimke… ('+n+')'):''});
 const waitTiles=()=>new Promise(r=>{scene.requestRender();let ok=0;const iv=setInterval(()=>{if(ts.tilesLoaded&&++ok>3){clearInterval(iv);r()}else if(!ts.tilesLoaded)ok=0},250);setTimeout(()=>{clearInterval(iv);r()},12000)});
 
 // --- location (geocoded, then saved override) ---
