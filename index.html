@@ -82,7 +82,7 @@ const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lng-a.lng);const h=Math.si
   }catch(e){}
   let GZ=85;
   try{const {ElevationService}=await google.maps.importLibrary('elevation');const e=await new ElevationService().getElevationForLocations({locations:[BC]});if(e.results&&e.results[0])GZ=e.results[0].elevation}catch(e){}
-  const bld=new Model3DElement({src:'zgrada.glb',position:{...BC,altitude:0},altitudeMode:'CLAMP_TO_GROUND',orientation:{heading:face,tilt:0,roll:0},scale:1});
+  const bld=new Model3DElement({src:'zgrada.glb',position:{...BC,altitude:0},altitudeMode:'CLAMP_TO_GROUND',orientation:{heading:(face+180)%360,tilt:0,roll:0},scale:1});
   map.append(bld);
   SITE.lat=BC.lat;SITE.lng=BC.lng;
   const site=new Marker3DElement({position:{...SITE,altitude:32},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:'Cara Dušana 103'});
