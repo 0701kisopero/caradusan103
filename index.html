@@ -46,7 +46,7 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 
 <section id="hero"><div class="stick"><canvas id="cv"></canvas><div class="bar" id="bar1"></div>
   <div class="cap" id="cap"><small>NOVI STAMBENI PROJEKAT · ZEMUN</small><h1>Cara Dušana 103</h1>
-  <p>Šest nivoa, balkoni u zelenilu i toplo svetlo u sumrak. Početak gradnje novembar 2026.</p>
+  <p>Skroluj i gledaj kako zgrada niče. Početak gradnje novembar 2026, useljenje septembar 2028.</p>
   <button class="btn" id="goLoc">📍 Pogledaj lokaciju</button></div>
   <div id="hint">SKROLUJ ↓</div></div></section>
 
@@ -61,7 +61,7 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 <div id="err"></div>
 
 <script>
-(()=>{const N=121,imgs=[],cv=document.getElementById('cv'),cx=cv.getContext('2d'),hero=document.getElementById('hero');let cur=-1;
+(()=>{const N=181,imgs=[],cv=document.getElementById('cv'),cx=cv.getContext('2d'),hero=document.getElementById('hero');let cur=-1;
 for(let i=1;i<=N;i++){const im=new Image();im.src='frames/f'+String(i).padStart(3,'0')+'.jpg';if(i===1)im.onload=()=>{cur=-1};imgs.push(im)}
 function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
 function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
