@@ -39,11 +39,8 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
   <section class="step" data-stop="near"><div class="card"><small>03 · U BLIZINI</small><h2>Šta je u blizini</h2><p>Okvirno vreme po vazdušnoj liniji. Klikni na mesto da ga vidiš.</p><ul class="poi" id="poi"></ul></div></section>
   <section class="step" style="min-height:60vh"></section>
 </div>
-<div id="tools"><button id="bTune">Podesi zgradu</button><button id="b360">360°</button></div>
-<div id="tune" style="position:fixed;right:14px;bottom:70px;z-index:7;display:none;flex-wrap:wrap;gap:6px;max-width:300px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;backdrop-filter:blur(8px)">
-<button data-a="l">⟲ 15°</button><button data-a="l1">⟲ 2°</button><button data-a="r1">⟳ 2°</button><button data-a="r">⟳ 15°</button><button data-a="up">Uspravi</button>
-<button data-a="w">← 2m</button><button data-a="e">→ 2m</button><button data-a="n">↑ 2m</button><button data-a="s">↓ 2m</button>
-<div id="tv" style="width:100%;font-size:12px;color:var(--mute)"></div></div>
+<div id="tools"><button id="b360">360°</button></div>
+
 <div id="err"></div>
 
 <script>
@@ -54,6 +51,7 @@ const err=t=>{const e=document.getElementById('err');e.textContent='Greška: '+t
 window.gm_authFailure=()=>err('Google ključ nije prihvaćen (proveri ograničenja ključa i da je uključen Maps JavaScript API).');
 window.addEventListener('unhandledrejection',e=>err(e.reason&&e.reason.message||e.reason));
 
+const KEY='AIzaSyA7obGqf-l7HMHyqDRBrFQKEs_s5TliWYs';
 const SITE={lat:44.851946,lng:20.394923};
 const POIS=[
   {n:'Glavna ulica',lat:44.8434,lng:20.4113},
@@ -67,23 +65,27 @@ const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lng-a.lng);const h=Math.si
 
 (async()=>{
   const {Map3DElement,Marker3DElement,Model3DElement}=await google.maps.importLibrary('maps3d');
-  const map=new Map3DElement({center:{...SITE,altitude:0},range:900,tilt:55,heading:20,mode:'SATELLITE'});
+  const map=new Map3DElement({center:{...SITE,altitude:90},range:700,tilt:58,heading:35,mode:'SATELLITE'});
   try{map.defaultUIHidden=true}catch(_){}
   document.getElementById('map').append(map);
 
-  const T={heading:0,tilt:270,roll:0,dx:0,dy:0};
-  try{Object.assign(T,JSON.parse(localStorage.getItem('cd103b')||'{}'))}catch(_){}
+  // --- auto-orient: face the nearest road, sit just behind it ---
   const mPerLat=111320,mPerLng=111320*Math.cos(rad(SITE.lat));
-  const bpos=()=>({lat:SITE.lat+T.dy/mPerLat,lng:SITE.lng+T.dx/mPerLng,altitude:0});
-  const bld=new Model3DElement({src:'zgrada.glb',position:bpos(),altitudeMode:'CLAMP_TO_GROUND',orientation:{heading:T.heading,tilt:T.tilt,roll:T.roll},scale:1});
+  const brg=(a,b)=>{const y=(b.lng-a.lng)*mPerLng,x=(b.lat-a.lat)*mPerLat;return (Math.atan2(y,x)*180/Math.PI+360)%360};
+  const off=(p,b,m)=>({lat:p.lat+Math.cos(rad(b))*m/mPerLat,lng:p.lng+Math.sin(rad(b))*m/mPerLng});
+  let face=215,BC={...SITE};
+  try{
+    const r=await fetch('https://roads.googleapis.com/v1/nearestRoads?points='+SITE.lat+','+SITE.lng+'&key='+KEY).then(r=>r.json());
+    const pts=(r.snappedPoints||[]).map(p=>({lat:p.location.latitude,lng:p.location.longitude}));
+    if(pts.length){pts.sort((a,b)=>dist(SITE,a)-dist(SITE,b));const rp=pts[0];
+      if(dist(SITE,rp)>2){face=brg(SITE,rp);BC=off(rp,(face+180)%360,10.5)}}
+  }catch(e){}
+  let GZ=85;
+  try{const {ElevationService}=await google.maps.importLibrary('elevation');const e=await new ElevationService().getElevationForLocations({locations:[BC]});if(e.results&&e.results[0])GZ=e.results[0].elevation}catch(e){}
+  const bld=new Model3DElement({src:'zgrada.glb',position:{...BC,altitude:0},altitudeMode:'CLAMP_TO_GROUND',orientation:{heading:face,tilt:0,roll:0},scale:1});
   map.append(bld);
-  const upd=()=>{bld.position=bpos();bld.orientation={heading:T.heading,tilt:T.tilt,roll:T.roll};try{localStorage.setItem('cd103b',JSON.stringify(T))}catch(_){};document.getElementById('tv').textContent='okret '+T.heading+'° · uspravno '+T.tilt+'/'+T.roll+' · pomak '+T.dx+','+T.dy+' m'};
-  const act={l:()=>T.heading=(T.heading+345)%360,r:()=>T.heading=(T.heading+15)%360,l1:()=>T.heading=(T.heading+358)%360,r1:()=>T.heading=(T.heading+2)%360,
-    up:()=>{const o=[[270,0],[90,0],[0,0],[0,90],[0,270]];const i=o.findIndex(a=>a[0]===T.tilt&&a[1]===T.roll);[T.tilt,T.roll]=o[(i+1)%o.length]},
-    n:()=>T.dy+=2,s:()=>T.dy-=2,e:()=>T.dx+=2,w:()=>T.dx-=2};
-  document.querySelectorAll('#tune [data-a]').forEach(b=>b.onclick=()=>{act[b.dataset.a]();upd()});
-  document.getElementById('bTune').onclick=()=>{const t=document.getElementById('tune');t.style.display=t.style.display==='flex'?'none':'flex';upd()};
-  const site=new Marker3DElement({position:{...SITE,altitude:45},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:'Cara Dušana 103'});
+  SITE.lat=BC.lat;SITE.lng=BC.lng;
+  const site=new Marker3DElement({position:{...SITE,altitude:32},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:'Cara Dušana 103'});
   map.append(site);
   const poiM=POIS.map(p=>new Marker3DElement({position:{lat:p.lat,lng:p.lng,altitude:30},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:p.n}));
 
@@ -93,16 +95,16 @@ const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lng-a.lng);const h=Math.si
     li.onclick=()=>fly({lat:p.lat,lng:p.lng},p.car?2500:450,60,0,2500);ul.appendChild(li)});
 
   let cur=null;
-  function fly(c,range,tilt,heading,ms){try{map.stopCameraAnimation()}catch(_){};map.flyCameraTo({endCamera:{center:{...c,altitude:0},range,tilt,heading},durationMillis:ms||3000})}
-  function orbit(){map.flyCameraAround({camera:{center:{...SITE,altitude:0},range:280,tilt:65,heading:map.heading||0},durationMillis:40000,repeatCount:3})}
+  function fly(c,range,tilt,heading,ms){try{map.stopCameraAnimation()}catch(_){};map.flyCameraTo({endCamera:{center:{...c,altitude:GZ+10},range,tilt,heading},durationMillis:ms||3000})}
+  function orbit(){map.flyCameraAround({camera:{center:{...SITE,altitude:GZ+10},range:120,tilt:72,heading:map.heading||face},durationMillis:40000,repeatCount:3})}
   function showPois(on){poiM.forEach(m=>{if(on&&!m.isConnected)map.append(m);if(!on&&m.isConnected)m.remove()})}
   const STOPS={
-    zemun:()=>{showPois(false);fly(SITE,900,55,20)},
-    site:()=>{showPois(false);fly(SITE,280,65,map.heading||20,2800);setTimeout(()=>{if(cur==='site')orbit()},3000)},
+    zemun:()=>{showPois(false);fly(SITE,650,58,face+180)},
+    site:()=>{showPois(false);fly(SITE,95,74,face+180+25,2800);setTimeout(()=>{if(cur==='site')orbit()},3000)},
     near:()=>{showPois(true);fly({lat:(SITE.lat+44.8465)/2,lng:(SITE.lng+20.410)/2},2200,45,15)}
   };
   const go=k=>{if(cur===k)return;cur=k;STOPS[k]()};
-  document.getElementById('b360').onclick=()=>{cur='site';fly(SITE,280,65,map.heading||20,1500);setTimeout(orbit,1600)};
+  document.getElementById('b360').onclick=()=>{cur='site';fly(SITE,120,72,face+180,1500);setTimeout(orbit,1600)};
   const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)go(e.target.dataset.stop)}),{threshold:.55});
   document.querySelectorAll('.step[data-stop]').forEach(s=>io.observe(s));
 })().catch(e=>err(e.message||e));
