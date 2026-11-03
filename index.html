@@ -25,7 +25,7 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 .poi li:hover{color:var(--acc)}
 .poi em{font-style:normal;color:var(--mute);white-space:nowrap}
 #tools{position:fixed;right:14px;bottom:22px;z-index:6;display:flex;gap:8px}
-#tools button{font:500 13px Inter,sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:22px;padding:9px 14px;cursor:pointer;backdrop-filter:blur(8px)}
+#tools button,#tune button{font:500 13px Inter,sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:22px;padding:9px 14px;cursor:pointer;backdrop-filter:blur(8px)}
 #err{position:fixed;left:50%;top:60px;transform:translateX(-50%);z-index:9;background:#3a1616;border:1px solid #a33;border-radius:10px;padding:10px 14px;font-size:13px;display:none;max-width:92vw}
 @media (max-width:640px){.step{align-items:flex-end;padding-bottom:90px}.card{max-width:none;width:100%}.card h2{font-size:20px}}
 </style>
@@ -39,7 +39,11 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
   <section class="step" data-stop="near"><div class="card"><small>03 · U BLIZINI</small><h2>Šta je u blizini</h2><p>Okvirno vreme po vazdušnoj liniji. Klikni na mesto da ga vidiš.</p><ul class="poi" id="poi"></ul></div></section>
   <section class="step" style="min-height:60vh"></section>
 </div>
-<div id="tools"><button id="b360">360°</button></div>
+<div id="tools"><button id="bTune">Podesi zgradu</button><button id="b360">360°</button></div>
+<div id="tune" style="position:fixed;right:14px;bottom:70px;z-index:7;display:none;flex-wrap:wrap;gap:6px;max-width:300px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;backdrop-filter:blur(8px)">
+<button data-a="l">⟲ 15°</button><button data-a="l1">⟲ 2°</button><button data-a="r1">⟳ 2°</button><button data-a="r">⟳ 15°</button><button data-a="up">Uspravi</button>
+<button data-a="w">← 2m</button><button data-a="e">→ 2m</button><button data-a="n">↑ 2m</button><button data-a="s">↓ 2m</button>
+<div id="tv" style="width:100%;font-size:12px;color:var(--mute)"></div></div>
 <div id="err"></div>
 
 <script>
@@ -50,7 +54,7 @@ const err=t=>{const e=document.getElementById('err');e.textContent='Greška: '+t
 window.gm_authFailure=()=>err('Google ključ nije prihvaćen (proveri ograničenja ključa i da je uključen Maps JavaScript API).');
 window.addEventListener('unhandledrejection',e=>err(e.reason&&e.reason.message||e.reason));
 
-const SITE={lat:44.853322,lng:20.393542};
+const SITE={lat:44.851946,lng:20.394923};
 const POIS=[
   {n:'Glavna ulica',lat:44.8434,lng:20.4113},
   {n:'Zemunska pijaca',lat:44.8443,lng:20.4099},
@@ -62,11 +66,23 @@ const rad=d=>d*Math.PI/180;
 const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dn/2)**2;return 2*6371000*Math.asin(Math.sqrt(h))};
 
 (async()=>{
-  const {Map3DElement,Marker3DElement}=await google.maps.importLibrary('maps3d');
+  const {Map3DElement,Marker3DElement,Model3DElement}=await google.maps.importLibrary('maps3d');
   const map=new Map3DElement({center:{...SITE,altitude:0},range:900,tilt:55,heading:20,mode:'SATELLITE'});
   try{map.defaultUIHidden=true}catch(_){}
   document.getElementById('map').append(map);
 
+  const T={heading:0,tilt:270,roll:0,dx:0,dy:0};
+  try{Object.assign(T,JSON.parse(localStorage.getItem('cd103b')||'{}'))}catch(_){}
+  const mPerLat=111320,mPerLng=111320*Math.cos(rad(SITE.lat));
+  const bpos=()=>({lat:SITE.lat+T.dy/mPerLat,lng:SITE.lng+T.dx/mPerLng,altitude:0});
+  const bld=new Model3DElement({src:'zgrada.glb',position:bpos(),altitudeMode:'CLAMP_TO_GROUND',orientation:{heading:T.heading,tilt:T.tilt,roll:T.roll},scale:1});
+  map.append(bld);
+  const upd=()=>{bld.position=bpos();bld.orientation={heading:T.heading,tilt:T.tilt,roll:T.roll};try{localStorage.setItem('cd103b',JSON.stringify(T))}catch(_){};document.getElementById('tv').textContent='okret '+T.heading+'° · uspravno '+T.tilt+'/'+T.roll+' · pomak '+T.dx+','+T.dy+' m'};
+  const act={l:()=>T.heading=(T.heading+345)%360,r:()=>T.heading=(T.heading+15)%360,l1:()=>T.heading=(T.heading+358)%360,r1:()=>T.heading=(T.heading+2)%360,
+    up:()=>{const o=[[270,0],[90,0],[0,0],[0,90],[0,270]];const i=o.findIndex(a=>a[0]===T.tilt&&a[1]===T.roll);[T.tilt,T.roll]=o[(i+1)%o.length]},
+    n:()=>T.dy+=2,s:()=>T.dy-=2,e:()=>T.dx+=2,w:()=>T.dx-=2};
+  document.querySelectorAll('#tune [data-a]').forEach(b=>b.onclick=()=>{act[b.dataset.a]();upd()});
+  document.getElementById('bTune').onclick=()=>{const t=document.getElementById('tune');t.style.display=t.style.display==='flex'?'none':'flex';upd()};
   const site=new Marker3DElement({position:{...SITE,altitude:45},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:'Cara Dušana 103'});
   map.append(site);
   const poiM=POIS.map(p=>new Marker3DElement({position:{lat:p.lat,lng:p.lng,altitude:30},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:p.n}));
