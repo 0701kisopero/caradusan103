@@ -60,6 +60,9 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 <script>window.CESIUM_BASE_URL='https://cdn.jsdelivr.net/npm/cesium@1.140.0/Build/Cesium/';</script>
 <script src="https://cdn.jsdelivr.net/npm/cesium@1.140.0/Build/Cesium/Cesium.js"></script>
 <script>
+window.addEventListener('error',e=>{const t=document.getElementById('coverT');if(t)t.textContent='Greška: '+e.message});
+window.addEventListener('unhandledrejection',e=>{const t=document.getElementById('coverT');if(t)t.textContent='Greška: '+(e.reason&&e.reason.message||e.reason)});
+setTimeout(()=>{const cv=document.getElementById('cover');if(cv){cv.style.opacity=0;setTimeout(()=>cv.remove(),900)}},35000);
 (async function(){
 const TOKEN='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6Ik4ydVkxUlpneUdtaHNXS1kiLCJqdGkiOiIyMGE1ZWFmNi04Mjk0LTRkY2UtYjc5Ni1jMzQxNTRiZWU4OWQiLCJpZCI6NTQyMDYxLCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3OTM3Mzg0NDR9.Fz-8CEvt3_NSJICL9Gz31BDNM1O-v3ZYKUCjX2XJsr0';
 const msg=(t,ms)=>{const m=document.getElementById('msg');m.innerHTML=t;m.style.display='block';clearTimeout(msg._t);if(ms)msg._t=setTimeout(()=>m.style.display='none',ms)};
@@ -77,7 +80,7 @@ viewer.clock.currentTime=C.JulianDate.fromIso8601('2026-06-21T16:30:00Z');
 let ts;try{ts=await C.createGooglePhotorealistic3DTileset({onlyUsingWithGoogleGeocoder:true},{maximumScreenSpaceError:6,dynamicScreenSpaceError:false,foveatedScreenSpaceError:false,skipLevelOfDetail:false,cacheBytes:1024*1024*1024});scene.primitives.add(ts);}catch(e){fail(e);return}
 const ld=document.getElementById('load');let pend=0;
 ts.tileLoadProgressEvent.addEventListener((n)=>{pend=n;const ct=document.getElementById('coverT');if(ct)ct.textContent='Učitavam 3D snimke Zemuna… '+(n>0?n:'');ld.style.opacity=n>0?1:0;ld.querySelector('b').textContent=n>0?('Učitavam 3D snimke… ('+n+')'):''});
-const waitTiles=()=>new Promise(r=>{let ok=0;const iv=setInterval(()=>{if(ts.tilesLoaded&&++ok>3){clearInterval(iv);r()}else if(!ts.tilesLoaded)ok=0},250);setTimeout(()=>{clearInterval(iv);r()},25000)});
+const waitTiles=()=>new Promise(r=>{scene.requestRender();let ok=0;const iv=setInterval(()=>{if(ts.tilesLoaded&&++ok>3){clearInterval(iv);r()}else if(!ts.tilesLoaded)ok=0},250);setTimeout(()=>{clearInterval(iv);r()},12000)});
 
 // --- location (geocoded, then saved override) ---
 let SITE={lon:20.393542,lat:44.853322};
@@ -85,7 +88,7 @@ try{const s=JSON.parse(localStorage.getItem('cd103pin2')||'null');if(s)SITE=s;el
 }
 const GROUND_GUESS=118;
 async function groundH(lon,lat){
-  try{const p=await scene.sampleHeightMostDetailed([C.Cartographic.fromDegrees(lon,lat)]);if(p[0]&&isFinite(p[0].height))return p[0].height}catch(e){}
+  try{const p=await Promise.race([scene.sampleHeightMostDetailed([C.Cartographic.fromDegrees(lon,lat)]),new Promise((_,j)=>setTimeout(()=>j('t'),3000))]);if(p[0]&&isFinite(p[0].height))return p[0].height}catch(e){}
   return GROUND_GUESS;
 }
 let gH=GROUND_GUESS;
@@ -164,6 +167,7 @@ h.setInputAction(async ev=>{
 
 // --- init ---
 renderPois();
+setTimeout(()=>{const cv=document.getElementById('cover');if(cv){cv.style.opacity=0;setTimeout(()=>cv.remove(),900);ready=true}},30000);
 const ssc=scene.screenSpaceCameraController;ssc.minimumZoomDistance=60;ssc.maximumZoomDistance=2500;
 viewer.camera.changed.addEventListener(()=>{const c=C.Cartographic.fromCartesian(viewer.camera.position);if(c.height>gH+2500){c.height=gH+2500;viewer.camera.position=C.Cartographic.toCartesian(c)}});
 await waitTiles();await placeSite();
