@@ -60,7 +60,11 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 for(let i=1;i<=N;i++){const im=new Image();im.src='frames/f'+String(i).padStart(3,'0')+'.jpg';if(i===1)im.onload=()=>draw(0);imgs.push(im)}
 function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
 function draw(k){const im=imgs[k];if(!im||!im.complete||!im.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){k=j;break}}
-  const m=imgs[k];if(!m.naturalWidth)return;const s=Math.max(cv.width/m.naturalWidth,cv.height/m.naturalHeight),w=m.naturalWidth*s,h=m.naturalHeight*s;cx.drawImage(m,(cv.width-w)/2,(cv.height-h)/2,w,h)}
+  const m=imgs[k];if(!m.naturalWidth)return;const W=cv.width,H=cv.height,iw=m.naturalWidth,ih=m.naturalHeight;
+  const sc=Math.max(W/iw,H/ih),sf=Math.min(W/iw,H/ih);
+  if(W/H>=1.2){cx.drawImage(m,(W-iw*sc)/2,(H-ih*sc)/2,iw*sc,ih*sc);return}
+  cx.filter='blur(24px) brightness(.55)';cx.drawImage(m,(W-iw*sc)/2,(H-ih*sc)/2,iw*sc,ih*sc);cx.filter='none';
+  const w=iw*sf,h=ih*sf,y=H*.42-h/2;cx.drawImage(m,(W-w)/2,y,w,h)}
 let tgt=0,pos=0;function onS(){const r=hero.getBoundingClientRect(),t=Math.min(1,Math.max(0,-r.top/(r.height-innerHeight)));tgt=t;
   document.getElementById('cap').style.opacity=t<.15?1:Math.max(0,1-(t-.15)*6);document.getElementById('hint').style.opacity=t<.03?1:0;document.getElementById('bar').style.width=(t*100)+'%';const tl=document.getElementById('tools');if(tl)tl.style.display=r.bottom>innerHeight*.5?'none':'flex'}
 function loop(){pos+=(tgt-pos)*.18;const k=Math.round(pos*(N-1));if(k!==cur){cur=k;draw(k)}requestAnimationFrame(loop)}
@@ -106,7 +110,7 @@ const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lng-a.lng);const h=Math.si
   }catch(e){}
   let GZ=85;
   try{const {ElevationService}=await google.maps.importLibrary('elevation');const e=await new ElevationService().getElevationForLocations({locations:[BC]});if(e.results&&e.results[0])GZ=e.results[0].elevation}catch(e){}
-  const bld=new Model3DElement({src:'zgrada.glb',position:{...BC,altitude:0},altitudeMode:'CLAMP_TO_GROUND',orientation:{heading:(face+180)%360,tilt:0,roll:0},scale:1});
+  const bld=new Model3DElement({src:'zgrada3.glb',position:{...BC,altitude:0},altitudeMode:'CLAMP_TO_GROUND',orientation:{heading:face,tilt:0,roll:0},scale:1});
   map.append(bld);
   SITE.lat=BC.lat;SITE.lng=BC.lng;
   const site=new Marker3DElement({position:{...SITE,altitude:32},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:'Cara Dušana 103'});
