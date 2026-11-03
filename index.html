@@ -53,6 +53,7 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 
 <div id="tools"><button id="bOrbit">360°</button><button id="bPin">Pomeri pin</button></div>
 <div id="msg"></div>
+<div id="dbg" style="position:fixed;right:10px;top:46px;z-index:10;font:11px monospace;color:#ddd;background:rgba(0,0,0,.55);padding:4px 7px;border-radius:6px;max-width:60vw"></div>
 <div id="cover" style="position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:opacity .8s"><b style="font-size:18px;letter-spacing:.06em">CARA DUŠANA 103 · ZEMUN</b><span style="color:var(--mute);font-size:14px" id="coverT">Učitavam 3D snimke Zemuna…</span></div>
 <div id="load" style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:7;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:13px;transition:opacity .4s;opacity:1;pointer-events:none"><b style="font-weight:500">Učitavam 3D snimke…</b></div>
 <div id="err"><p>3D mapa nije mogla da se učita u ovom pregledaču.<br><span style="color:var(--mute)" id="errd"></span></p></div>
@@ -79,6 +80,8 @@ const scene=viewer.scene;scene.globe.show=false;scene.fog.enabled=false;scene.sk
 viewer.clock.currentTime=C.JulianDate.fromIso8601('2026-06-21T16:30:00Z');
 let ts;try{ts=await C.createGooglePhotorealistic3DTileset({onlyUsingWithGoogleGeocoder:true},{maximumScreenSpaceError:6,dynamicScreenSpaceError:false,foveatedScreenSpaceError:false,skipLevelOfDetail:false,cacheBytes:1024*1024*1024});scene.primitives.add(ts);}catch(e){fail(e);return}
 const ld=document.getElementById('load');let pend=0;
+let fails=0,lastErr='';ts.tileFailed.addEventListener(e=>{fails++;lastErr=String(e.message||e).slice(0,140)});
+setInterval(()=>{const d=document.getElementById('dbg');if(d)d.textContent='3D: '+(ts.tilesLoaded?'učitano':'učitava')+' · greške '+fails+(lastErr?' · '+lastErr:'')},1000);
 ts.loadProgress.addEventListener((a,b)=>{const n=a+b;pend=n;const ct=document.getElementById('coverT');if(ct)ct.textContent='Učitavam 3D snimke Zemuna… '+(n>0?n:'');ld.style.opacity=n>0?1:0;ld.querySelector('b').textContent=n>0?('Učitavam 3D snimke… ('+n+')'):''});
 const waitTiles=()=>new Promise(r=>{scene.requestRender();let ok=0;const iv=setInterval(()=>{if(ts.tilesLoaded&&++ok>3){clearInterval(iv);r()}else if(!ts.tilesLoaded)ok=0},250);setTimeout(()=>{clearInterval(iv);r()},12000)});
 
