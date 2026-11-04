@@ -163,7 +163,7 @@ footer{background:var(--ink);color:#8d877c;font-size:12.5px;text-align:center;pa
 
 <script>
 (()=>{const N=141,imgs=[],cv=document.getElementById('cv'),cx=cv.getContext('2d'),hero=document.getElementById('hero');let cur=-1;
-for(let i=1;i<=N;i++){const im=new Image();im.src='hf/h'+String(i).padStart(3,'0')+'.jpg';if(i===1)im.onload=()=>{cur=-1};imgs.push(im)}
+for(let i=1;i<=N;i++){const im=new Image();im.src='hs/h'+String(i).padStart(3,'0')+'.jpg';if(i===1)im.onload=()=>{cur=-1};imgs.push(im)}
 function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
 function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
   if(!m||!m.naturalWidth)return;const W=cv.width,H=cv.height,iw=m.naturalWidth,ih=m.naturalHeight,sc=Math.max(W/iw,H/ih),sf=Math.min(W/iw,H/ih);
