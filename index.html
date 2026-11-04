@@ -56,6 +56,7 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 #modal.on{display:flex}
 #modal img{max-width:100%;max-height:68vh;border-radius:12px;background:#e9ebee}
 #modal h3{margin:14px 0 4px;font-size:22px}#modal p{margin:0;color:var(--mute)}
+#tour{position:fixed;inset:0;z-index:50;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center}#tour.on{display:flex}#tour video{width:100%;max-height:85vh;background:#000}#tour p{color:var(--mute);font-size:13px;margin:10px 16px}#tour .x{position:absolute;top:14px;right:16px;font-size:28px;background:none;border:0;color:#fff;cursor:pointer;z-index:2}
 #modal .x{position:absolute;top:14px;right:16px;font-size:28px;background:none;border:0;color:#fff;cursor:pointer}
 #near{padding:80px 20px 120px;max-width:640px;margin:0 auto}
 #near h2{margin:8px 0 16px;font-size:30px}
@@ -85,7 +86,8 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 <div class="fac"><div class="in"><img src="ulica_susedi.jpg" alt="Cara Dušana 103, pogled sa ulice"><div id="fls"></div></div></div>
 <div class="tabs" id="tabs"></div><div class="units" id="units"></div>
 <p class="note">Raspored stanova po spratovima i cene su okvirni primer za koncept. Tipovi i kvadrature su iz oglasa.</p></section>
-<div id="modal"><button class="x" id="mx">×</button><img id="mi" alt="Raspored stana"><h3 id="mt"></h3><p id="mp"></p></div>
+<div id="modal"><button class="x" id="mx">×</button><img id="mi" alt="Raspored stana"><h3 id="mt"></h3><p id="mp"></p><button class="btn" id="tourBtn" style="display:none">▶ Prošetaj kroz stan</button></div>
+<div id="tour"><button class="x" id="tx">×</button><video id="tv" playsinline muted preload="none" src="stan52/tura.mp4"></video><p>Dvosobni stan 52 m² · ilustracija enterijera</p></div>
 
 <section id="near"><small>05 · U BLIZINI</small><h2>Sve na par minuta</h2><ul class="poi" id="poi"></ul>
 <p style="color:var(--mute);font-size:13px;margin-top:14px">Okvirno vreme po vazdušnoj liniji.</p></section>
@@ -134,7 +136,10 @@ F.forEach(f=>{const b=document.createElement('button');b.className='fl';b.style.
   const t=document.createElement('button');t.textContent=f.k+'. sprat';t.dataset.k=f.k;t.onclick=()=>pick(f.k);tabs.append(t)});
 function pick(k){const f=F.find(x=>x.k==k);[...fls.children,...tabs.children].forEach(e=>e.classList.toggle('on',e.dataset.k==k));
   units.innerHTML=f.u.map((id,i)=>{const t=T[id];return '<button class="u" data-id="'+id+'" data-no="'+k+'.'+(i+1)+'"><i>Stan '+k+'.'+(i+1)+'</i><b>'+t.n+'</b><span class="m">'+t.m+' m²</span><span class="p">'+eur(t.m*PM)+'</span><span class="m">Pogledaj raspored →</span></button>'}).join('');
-  units.querySelectorAll('.u').forEach(b=>b.onclick=()=>{const t=T[b.dataset.id];mi.src='plans/'+t.img+'.jpg';mt.textContent='Stan '+b.dataset.no+' · '+t.n;mp.textContent=t.m+' m² · '+eur(t.m*PM)+' (okvirno)';modal.classList.add('on')})}
+  units.querySelectorAll('.u').forEach(b=>b.onclick=()=>{const t=T[b.dataset.id];mi.src='plans/'+t.img+'.jpg';mt.textContent='Stan '+b.dataset.no+' · '+t.n;mp.textContent=t.m+' m² · '+eur(t.m*PM)+' (okvirno)';tb.style.display=t.img=='d52'?'inline-flex':'none';modal.classList.add('on')})}
+const tb=document.getElementById('tourBtn'),tour=document.getElementById('tour'),tv=document.getElementById('tv');
+tb.onclick=()=>{modal.classList.remove('on');tour.classList.add('on');tv.currentTime=0;tv.play()};
+document.getElementById('tx').onclick=()=>{tv.pause();tour.classList.remove('on')};
 const modal=document.getElementById('modal'),mi=document.getElementById('mi'),mt=document.getElementById('mt'),mp=document.getElementById('mp');
 document.getElementById('mx').onclick=()=>modal.classList.remove('on');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('on')};
 pick(3);})();
