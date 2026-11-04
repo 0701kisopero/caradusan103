@@ -50,10 +50,10 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
   <button class="btn" id="goLoc">📍 Pogledaj lokaciju</button></div>
   <div id="hint">SKROLUJ ↓</div></div></section>
 
-<section id="loc"><div class="stick"><canvas id="cv2"></canvas><div id="render"></div><div class="bar" id="bar2"></div>
+<section id="loc"><div class="stick"><canvas id="cv2"></canvas><div class="bar" id="bar2"></div>
   <div class="lab" id="l1"><small>01 · ZEMUN</small><h2>Cara Dušana, Zemun</h2><p>Nekoliko minuta od Glavne ulice, pijace i Dunava.</p></div>
   <div class="lab" id="l2"><small>02 · PARCELA</small><h2>Ovde niče zgrada</h2><p>Između postojećih kuća, u ulici Cara Dušana.</p></div>
-  <div class="lab" id="l3"><small>03 · CARA DUŠANA 103</small><h2>Ovako će izgledati</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom.</p></div>
+  <div class="lab" id="l3"><small>03 · CARA DUŠANA 103</small><h2>Ovde, u ulici Cara Dušana</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom.</p></div>
 </div></section>
 
 <section id="near"><small>04 · U BLIZINI</small><h2>Sve na par minuta</h2><ul class="poi" id="poi"></ul>
@@ -81,7 +81,7 @@ const POIS=[{n:'Glavna ulica',lat:44.8434,lng:20.4113},{n:'Zemunska pijaca',lat:
 const rad=d=>d*Math.PI/180,cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
 const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dn/2)**2;return 2*6371000*Math.asin(Math.sqrt(h))};
 document.getElementById('poi').innerHTML=POIS.map(p=>{const d=dist(SITE,p)*1.25;return '<li>'+p.n+'<em>'+(p.car?Math.max(3,Math.round(d/1000/25*60))+' min kolima':Math.max(1,Math.round(d/1000/4.8*60))+' min peške')+'</em></li>'}).join('');
-(()=>{const N=141,imgs=[],cv=document.getElementById('cv2'),cx=cv.getContext('2d'),loc=document.getElementById('loc'),rd=document.getElementById('render'),labs=['l1','l2','l3'].map(i=>document.getElementById(i));let cur=-1;
+(()=>{const N=141,imgs=[],cv=document.getElementById('cv2'),cx=cv.getContext('2d'),loc=document.getElementById('loc'),labs=['l1','l2','l3'].map(i=>document.getElementById(i));let cur=-1;
 for(let i=1;i<=N;i++){const im=new Image();im.loading='eager';im.src='zoom/z'+String(i).padStart(3,'0')+'.jpg';imgs.push(im)}
 function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
 function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
@@ -89,9 +89,8 @@ function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0
   cx.fillStyle='#000';cx.fillRect(0,0,W,H);
   const s=(W/H<1)?sc:sf;cx.drawImage(m,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}
 let tgt=0,pos=0;function onS(){const r=loc.getBoundingClientRect();tgt=cl(-r.top/(r.height-innerHeight))}
-function loop(){pos+=(tgt-pos)*.18;const v=cl(pos/.86),k=Math.round(v*(N-1));if(k!==cur){cur=k;draw(k)}
-  rd.style.opacity=cl((pos-.86)/.1);
-  labs[0].style.opacity=pos<.3?1:0;labs[1].style.opacity=pos>=.45&&pos<.84?1:0;labs[2].style.opacity=pos>=.93?1:0;
+function loop(){pos+=(tgt-pos)*.18;const v=cl(pos/.92),k=Math.round(v*(N-1));if(k!==cur){cur=k;draw(k)}
+  labs[0].style.opacity=pos<.3?1:0;labs[1].style.opacity=pos>=.45&&pos<.85?1:0;labs[2].style.opacity=pos>=.92?1:0;
   document.getElementById('bar2').style.width=(pos*100)+'%';requestAnimationFrame(loop)}
 addEventListener('resize',size);addEventListener('scroll',onS,{passive:true});size();onS();loop();})();
 </script>
