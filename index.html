@@ -24,8 +24,8 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 #hint{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);font-size:12px;letter-spacing:.14em;color:#ccc}
 .bar{position:absolute;left:0;top:0;height:3px;background:var(--acc);width:0;z-index:3}
 #loc{height:520vh;position:relative}
-#map{position:absolute;inset:0}
-#map gmp-map-3d{width:100%;height:100%;display:block}
+#loc .stick{background:#000}
+#cv2{width:100%;height:100%;display:block}
 #render{position:absolute;inset:0;opacity:0;background:#000 center/cover no-repeat url(ulica_susedi.jpg);pointer-events:none}
 @media (max-aspect-ratio:1/1){#render{background-size:contain;background-color:#0b0d10}}
 .lab{position:absolute;left:16px;right:16px;bottom:28px;max-width:420px;background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;padding:18px 20px;transition:opacity .35s;opacity:0}
@@ -50,7 +50,7 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
   <button class="btn" id="goLoc">📍 Pogledaj lokaciju</button></div>
   <div id="hint">SKROLUJ ↓</div></div></section>
 
-<section id="loc"><div class="stick"><div id="map"></div><div id="render"></div><div class="bar" id="bar2"></div>
+<section id="loc"><div class="stick"><canvas id="cv2"></canvas><div id="render"></div><div class="bar" id="bar2"></div>
   <div class="lab" id="l1"><small>01 · ZEMUN</small><h2>Cara Dušana, Zemun</h2><p>Nekoliko minuta od Glavne ulice, pijace i Dunava.</p></div>
   <div class="lab" id="l2"><small>02 · PARCELA</small><h2>Ovde niče zgrada</h2><p>Između postojećih kuća, u ulici Cara Dušana.</p></div>
   <div class="lab" id="l3"><small>03 · CARA DUŠANA 103</small><h2>Ovako će izgledati</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom.</p></div>
@@ -76,55 +76,24 @@ addEventListener('resize',size);addEventListener('scroll',onS,{passive:true});si
 document.getElementById('goLoc').onclick=()=>document.getElementById('loc').scrollIntoView({behavior:'smooth'});})();
 </script>
 <script>
-(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key:"AIzaSyA7obGqf-l7HMHyqDRBrFQKEs_s5TliWYs",v:"beta",language:"sr-Latn",region:"RS"});
-</script>
-<script>
-const KEY='AIzaSyA7obGqf-l7HMHyqDRBrFQKEs_s5TliWYs';
-const err=t=>{const e=document.getElementById('err');e.textContent='Greška: '+t;e.style.display='block'};
-window.gm_authFailure=()=>err('Google ključ nije prihvaćen.');
 const SITE={lat:44.851946,lng:20.394923};
 const POIS=[{n:'Glavna ulica',lat:44.8434,lng:20.4113},{n:'Zemunska pijaca',lat:44.8443,lng:20.4099},{n:'Gardoš kula',lat:44.8487,lng:20.4097},{n:'Kej oslobođenja (Dunav)',lat:44.8462,lng:20.4142},{n:'Ušće, Novi Beograd',lat:44.8159,lng:20.4366,car:true}];
-const rad=d=>d*Math.PI/180,lerp=(a,b,t)=>a+(b-a)*t,cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const rad=d=>d*Math.PI/180,cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
 const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dn/2)**2;return 2*6371000*Math.asin(Math.sqrt(h))};
 document.getElementById('poi').innerHTML=POIS.map(p=>{const d=dist(SITE,p)*1.25;return '<li>'+p.n+'<em>'+(p.car?Math.max(3,Math.round(d/1000/25*60))+' min kolima':Math.max(1,Math.round(d/1000/4.8*60))+' min peške')+'</em></li>'}).join('');
-
-(async()=>{
-  const {Map3DElement,Marker3DElement}=await google.maps.importLibrary('maps3d');
-  const mPerLat=111320,mPerLng=111320*Math.cos(rad(SITE.lat));
-  const brg=(a,b)=>{const y=(b.lng-a.lng)*mPerLng,x=(b.lat-a.lat)*mPerLat;return (Math.atan2(y,x)*180/Math.PI+360)%360};
-  let face=215;
-  try{const r=await fetch('https://roads.googleapis.com/v1/nearestRoads?points='+SITE.lat+','+SITE.lng+'&key='+KEY).then(r=>r.json());
-    const pts=(r.snappedPoints||[]).map(p=>({lat:p.location.latitude,lng:p.location.longitude})).sort((a,b)=>dist(SITE,a)-dist(SITE,b));
-    if(pts.length&&dist(SITE,pts[0])>2)face=brg(SITE,pts[0]);}catch(e){}
-  let GZ=90;
-  try{const {ElevationService}=await google.maps.importLibrary('elevation');const e=await new ElevationService().getElevationForLocations({locations:[SITE]});if(e.results&&e.results[0])GZ=e.results[0].elevation}catch(e){}
-
-  const endHead=(face+180)%360;
-  const KEYS=[
-    {t:0,  r:2400,tilt:40,h:endHead-50,c:SITE},
-    {t:.4, r:700, tilt:58,h:endHead-25,c:SITE},
-    {t:.75,r:160, tilt:76,h:endHead-6, c:SITE},
-    {t:.92,r:70,  tilt:86,h:endHead,   c:SITE},
-    {t:1,  r:62,  tilt:88,h:endHead,   c:SITE}];
-  const map=new Map3DElement({center:{...KEYS[0].c,altitude:GZ},range:KEYS[0].r,tilt:KEYS[0].tilt,heading:KEYS[0].h,mode:'SATELLITE'});
-  try{map.defaultUIHidden=true}catch(_){}
-  document.getElementById('map').append(map);
-  map.append(new Marker3DElement({position:{...SITE,altitude:40},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:'Cara Dušana 103'}));
-
-  const loc=document.getElementById('loc'),rd=document.getElementById('render'),labs=['l1','l2','l3'].map(i=>document.getElementById(i));
-  let tgt=0,pos=-1;
-  function onS(){const r=loc.getBoundingClientRect();tgt=cl(-r.top/(r.height-innerHeight))}
-  addEventListener('scroll',onS,{passive:true});onS();
-  function cam(t){let i=0;while(i<KEYS.length-2&&t>KEYS[i+1].t)i++;const A=KEYS[i],B=KEYS[i+1],u=ease(cl((t-A.t)/(B.t-A.t)));
-    map.center={lat:lerp(A.c.lat,B.c.lat,u),lng:lerp(A.c.lng,B.c.lng,u),altitude:GZ+lerp(0,11,cl(t/.9))};
-    map.range=Math.exp(lerp(Math.log(A.r),Math.log(B.r),u));map.tilt=lerp(A.tilt,B.tilt,u);map.heading=lerp(A.h,B.h,u);}
-  (function loop(){
-    if(Math.abs(tgt-pos)>.0005){pos=pos<0?tgt:pos+(tgt-pos)*.12;cam(pos);
-      rd.style.opacity=cl((pos-.84)/.12);
-      labs[0].style.opacity=pos<.35?1:0;labs[1].style.opacity=pos>=.35&&pos<.84?1:0;labs[2].style.opacity=pos>=.9?1:0;
-      document.getElementById('bar2').style.width=(pos*100)+'%';}
-    requestAnimationFrame(loop)})();
-})().catch(e=>err(e.message||e));
+(()=>{const N=141,imgs=[],cv=document.getElementById('cv2'),cx=cv.getContext('2d'),loc=document.getElementById('loc'),rd=document.getElementById('render'),labs=['l1','l2','l3'].map(i=>document.getElementById(i));let cur=-1;
+for(let i=1;i<=N;i++){const im=new Image();im.loading='eager';im.src='zoom/z'+String(i).padStart(3,'0')+'.jpg';imgs.push(im)}
+function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
+function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
+  if(!m||!m.naturalWidth)return;const W=cv.width,H=cv.height,iw=m.naturalWidth,ih=m.naturalHeight,sc=Math.max(W/iw,H/ih),sf=Math.min(W/iw,H/ih);
+  cx.fillStyle='#000';cx.fillRect(0,0,W,H);
+  const s=(W/H<1)?sc:sf;cx.drawImage(m,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}
+let tgt=0,pos=0;function onS(){const r=loc.getBoundingClientRect();tgt=cl(-r.top/(r.height-innerHeight))}
+function loop(){pos+=(tgt-pos)*.18;const v=cl(pos/.86),k=Math.round(v*(N-1));if(k!==cur){cur=k;draw(k)}
+  rd.style.opacity=cl((pos-.86)/.1);
+  labs[0].style.opacity=pos<.3?1:0;labs[1].style.opacity=pos>=.45&&pos<.84?1:0;labs[2].style.opacity=pos>=.93?1:0;
+  document.getElementById('bar2').style.width=(pos*100)+'%';requestAnimationFrame(loop)}
+addEventListener('resize',size);addEventListener('scroll',onS,{passive:true});size();onS();loop();})();
 </script>
 </body>
 </html>
