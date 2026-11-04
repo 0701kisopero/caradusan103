@@ -9,7 +9,7 @@
 :root{--bg:#0b0d10;--ink:#f3f1ec;--mute:#b4b8be;--acc:#e8b86a;--card:rgba(14,16,20,.74);--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
-header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:linear-gradient(rgba(0,0,0,.55),transparent);pointer-events:none}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(11,13,16,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);pointer-events:none}
 header b{font-weight:700;letter-spacing:.04em}
 header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px solid var(--acc);padding:3px 8px;border-radius:20px}
 .stick{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
@@ -39,10 +39,10 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 #stan .hd p{margin:0 0 18px;color:var(--mute);line-height:1.5}
 .fac{position:relative;width:100%;max-width:1100px;margin:0 auto;aspect-ratio:2752/1536;overflow:hidden;border-radius:0}
 .fac .in{position:absolute;left:0;top:0;width:100%;height:100%}
-@media (max-aspect-ratio:1/1){.fac{aspect-ratio:auto;height:118vw}.fac .in{width:240%;height:auto;aspect-ratio:2752/1536;left:-83%;top:-1vw}}
+@media (max-aspect-ratio:1/1){.fac{aspect-ratio:auto;height:112vw}.fac .in{width:230%;height:auto;aspect-ratio:2752/1536;left:-62%;top:-1vw}}
 .fac img{width:100%;height:100%;display:block}
 .fl{position:absolute;left:31.3%;width:33.7%;border:2px solid transparent;border-radius:6px;background:rgba(232,184,106,0);cursor:pointer;transition:background .25s,border-color .25s;padding:0}
-.fl span{position:absolute;right:-2px;top:50%;transform:translate(100%,-50%);background:var(--acc);color:#111;font:700 11px Inter,sans-serif;padding:3px 7px;border-radius:0 6px 6px 0;opacity:0;transition:opacity .25s;white-space:nowrap}
+.fl span{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--acc);color:#111;font:700 11px Inter,sans-serif;padding:3px 8px;border-radius:12px;opacity:0;transition:opacity .25s;white-space:nowrap}
 .fl:hover,.fl.on{background:rgba(232,184,106,.4);border-color:var(--acc);box-shadow:0 0 18px rgba(232,184,106,.6)}
 .fl.on span{opacity:1}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:16px 20px 4px;max-width:900px;margin:0 auto;scrollbar-width:none}
