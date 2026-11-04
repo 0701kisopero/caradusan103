@@ -56,6 +56,14 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 #modal.on{display:flex}
 #modal img{max-width:100%;max-height:68vh;border-radius:12px;background:#e9ebee}
 #modal h3{margin:14px 0 4px;font-size:22px}#modal p{margin:0;color:var(--mute)}
+#walk{height:700vh;position:relative}#walk .stick{background:#000}#cv3{width:100%;height:100%;display:block}
+#walk .top{position:absolute;left:16px;right:16px;top:64px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
+#walk .ttl{background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+#walk .ttl small{color:var(--acc);letter-spacing:.14em;font-size:10.5px;font-weight:600}#walk .ttl b{display:block;font-size:16px;margin-top:2px}
+#walk .mini{width:92px;border-radius:10px;background:#e9ebee;border:1px solid var(--line);opacity:.95}
+#rooms{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;gap:6px;flex-wrap:wrap;padding:0 12px}
+#rooms span{font:600 12.5px Inter,sans-serif;padding:7px 12px;border-radius:20px;background:rgba(14,16,20,.6);border:1px solid var(--line);color:#ddd;transition:all .3s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#rooms span.on{background:var(--acc);color:#111;border-color:var(--acc)}
 #tour{position:fixed;inset:0;z-index:50;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center}#tour.on{display:flex}#tour video{width:100%;max-height:85vh;background:#000}#tour p{color:var(--mute);font-size:13px;margin:10px 16px}#tour .x{position:absolute;top:14px;right:16px;font-size:28px;background:none;border:0;color:#fff;cursor:pointer;z-index:2}
 #modal .x{position:absolute;top:14px;right:16px;font-size:28px;background:none;border:0;color:#fff;cursor:pointer}
 #near{padding:80px 20px 120px;max-width:640px;margin:0 auto}
@@ -89,7 +97,11 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 <div id="modal"><button class="x" id="mx">×</button><img id="mi" alt="Raspored stana"><h3 id="mt"></h3><p id="mp"></p><button class="btn" id="tourBtn" style="display:none">▶ Prošetaj kroz stan</button></div>
 <div id="tour"><button class="x" id="tx">×</button><video id="tv" playsinline muted preload="none" src="stan52/tura.mp4"></video><p>Dvosobni stan 52 m² · ilustracija enterijera</p></div>
 
-<section id="near"><small>05 · U BLIZINI</small><h2>Sve na par minuta</h2><ul class="poi" id="poi"></ul>
+<section id="walk"><div class="stick"><canvas id="cv3"></canvas><div class="bar" id="bar3"></div>
+  <div class="top"><div class="ttl"><small>05 · ŠETNJA KROZ STAN</small><b>Jednoiposobni 32 m²</b></div><img class="mini" src="plans/s32.jpg" alt="Raspored"></div>
+  <div id="rooms"><span>Ulaz</span><span>Kupatilo</span><span>Dnevna i kuhinja</span><span>Spavaća soba</span></div></div></section>
+
+<section id="near"><small>06 · U BLIZINI</small><h2>Sve na par minuta</h2><ul class="poi" id="poi"></ul>
 <p style="color:var(--mute);font-size:13px;margin-top:14px">Okvirno vreme po vazdušnoj liniji.</p></section>
 <div id="err"></div>
 
@@ -136,13 +148,25 @@ F.forEach(f=>{const b=document.createElement('button');b.className='fl';b.style.
   const t=document.createElement('button');t.textContent=f.k+'. sprat';t.dataset.k=f.k;t.onclick=()=>pick(f.k);tabs.append(t)});
 function pick(k){const f=F.find(x=>x.k==k);[...fls.children,...tabs.children].forEach(e=>e.classList.toggle('on',e.dataset.k==k));
   units.innerHTML=f.u.map((id,i)=>{const t=T[id];return '<button class="u" data-id="'+id+'" data-no="'+k+'.'+(i+1)+'"><i>Stan '+k+'.'+(i+1)+'</i><b>'+t.n+'</b><span class="m">'+t.m+' m²</span><span class="p">'+eur(t.m*PM)+'</span><span class="m">Pogledaj raspored →</span></button>'}).join('');
-  units.querySelectorAll('.u').forEach(b=>b.onclick=()=>{const t=T[b.dataset.id];mi.src='plans/'+t.img+'.jpg';mt.textContent='Stan '+b.dataset.no+' · '+t.n;mp.textContent=t.m+' m² · '+eur(t.m*PM)+' (okvirno)';tb.style.display=t.img=='d52'?'inline-flex':'none';modal.classList.add('on')})}
+  units.querySelectorAll('.u').forEach(b=>b.onclick=()=>{const t=T[b.dataset.id];mi.src='plans/'+t.img+'.jpg';mt.textContent='Stan '+b.dataset.no+' · '+t.n;mp.textContent=t.m+' m² · '+eur(t.m*PM)+' (okvirno)';tb.style.display=(t.img=='d52'||t.img=='s32')?'inline-flex':'none';tb.dataset.t=t.img;modal.classList.add('on')})}
 const tb=document.getElementById('tourBtn'),tour=document.getElementById('tour'),tv=document.getElementById('tv');
-tb.onclick=()=>{modal.classList.remove('on');tour.classList.add('on');tv.currentTime=0;tv.play()};
+tb.onclick=()=>{modal.classList.remove('on');if(tb.dataset.t=='s32'){document.getElementById('walk').scrollIntoView({behavior:'smooth'});return}tour.classList.add('on');tv.currentTime=0;tv.play()};
 document.getElementById('tx').onclick=()=>{tv.pause();tour.classList.remove('on')};
 const modal=document.getElementById('modal'),mi=document.getElementById('mi'),mt=document.getElementById('mt'),mp=document.getElementById('mp');
 document.getElementById('mx').onclick=()=>modal.classList.remove('on');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('on')};
 pick(3);})();
+</script>
+<script>
+(()=>{const N=197,imgs=[],cv=document.getElementById('cv3'),cx=cv.getContext('2d'),sec=document.getElementById('walk'),rooms=[...document.querySelectorAll('#rooms span')];let cur=-1,loaded=false;
+function load(){if(loaded)return;loaded=true;for(let i=1;i<=N;i++){const im=new Image();im.src='stan32/w'+String(i).padStart(3,'0')+'.jpg';if(i==1)im.onload=()=>{cur=-1};imgs.push(im)}}
+function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
+function draw(k){let m=imgs[k];if(!m||!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j]&&imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
+  if(!m||!m.naturalWidth)return;const W=cv.width,H=cv.height,iw=m.naturalWidth,ih=m.naturalHeight,s=(W/H<1)?Math.max(W/iw,H/ih):Math.min(W/iw,H/ih);
+  cx.fillStyle='#000';cx.fillRect(0,0,W,H);cx.drawImage(m,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}
+let tgt=0,pos=0;function onS(){const r=sec.getBoundingClientRect();if(r.top<innerHeight*3)load();tgt=Math.min(1,Math.max(0,-r.top/(r.height-innerHeight)))}
+function loop(){pos+=(tgt-pos)*.15;const k=Math.round(pos*(N-1));if(k!==cur&&imgs.length){cur=k;draw(k)}
+  const ri=pos<.18?0:pos<.42?1:pos<.85?2:3;rooms.forEach((e,i)=>e.classList.toggle('on',i==ri));document.getElementById('bar3').style.width=(pos*100)+'%';requestAnimationFrame(loop)}
+addEventListener('resize',size);addEventListener('scroll',onS,{passive:true});size();onS();loop();})();
 </script>
 </body>
 </html>
