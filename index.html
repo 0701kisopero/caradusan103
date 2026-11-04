@@ -32,8 +32,32 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 .lab small{color:var(--acc);letter-spacing:.14em;font-size:11px;font-weight:600}
 .lab h2{margin:6px 0 6px;font-size:22px;line-height:1.2}
 .lab p{margin:0;color:var(--mute);line-height:1.5;font-size:14.5px}
+#stan{padding:70px 0 40px}
+#stan .hd{padding:0 20px;max-width:900px;margin:0 auto}
+#stan small,#near small{color:var(--acc);letter-spacing:.14em;font-size:11px;font-weight:600}
+#stan h2{margin:8px 0 6px;font-size:30px}
+#stan .hd p{margin:0 0 18px;color:var(--mute);line-height:1.5}
+.fac{position:relative;width:100%;max-width:1100px;margin:0 auto;aspect-ratio:2752/1536;overflow:hidden;border-radius:0}
+.fac .in{position:absolute;left:0;top:0;width:100%;height:100%}
+@media (max-aspect-ratio:1/1){.fac{aspect-ratio:auto;height:118vw}.fac .in{width:240%;height:auto;aspect-ratio:2752/1536;left:-83%;top:-1vw}}
+.fac img{width:100%;height:100%;display:block}
+.fl{position:absolute;left:31.3%;width:33.7%;border:2px solid transparent;border-radius:6px;background:rgba(232,184,106,0);cursor:pointer;transition:background .25s,border-color .25s;padding:0}
+.fl span{position:absolute;right:-2px;top:50%;transform:translate(100%,-50%);background:var(--acc);color:#111;font:700 11px Inter,sans-serif;padding:3px 7px;border-radius:0 6px 6px 0;opacity:0;transition:opacity .25s;white-space:nowrap}
+.fl:hover,.fl.on{background:rgba(232,184,106,.4);border-color:var(--acc);box-shadow:0 0 18px rgba(232,184,106,.6)}
+.fl.on span{opacity:1}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:16px 20px 4px;max-width:900px;margin:0 auto;scrollbar-width:none}
+.tabs button{flex:0 0 auto;font:600 14px Inter,sans-serif;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:22px;padding:9px 16px;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#111;border-color:var(--acc)}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;padding:12px 20px;max-width:900px;margin:0 auto}
+.u{background:#14171c;border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;color:var(--ink);font-family:inherit}
+.u b{font-size:17px}.u .m{color:var(--mute);font-size:14px}.u .p{color:var(--acc);font-weight:700;font-size:18px;margin-top:4px}.u i{font-style:normal;font-size:13px;color:var(--ink);opacity:.8}
+.note{max-width:900px;margin:6px auto 0;padding:0 20px;color:var(--mute);font-size:12.5px}
+#modal{position:fixed;inset:0;z-index:40;background:rgba(5,6,8,.92);display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+#modal.on{display:flex}
+#modal img{max-width:100%;max-height:68vh;border-radius:12px;background:#e9ebee}
+#modal h3{margin:14px 0 4px;font-size:22px}#modal p{margin:0;color:var(--mute)}
+#modal .x{position:absolute;top:14px;right:16px;font-size:28px;background:none;border:0;color:#fff;cursor:pointer}
 #near{padding:80px 20px 120px;max-width:640px;margin:0 auto}
-#near small{color:var(--acc);letter-spacing:.14em;font-size:11px;font-weight:600}
 #near h2{margin:8px 0 16px;font-size:30px}
 .poi{list-style:none;margin:0;padding:0}
 .poi li{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line);font-size:16px}
@@ -56,7 +80,14 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
   <div class="lab" id="l3"><small>03 · CARA DUŠANA 103</small><h2>Ovde, u ulici Cara Dušana</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom.</p></div>
 </div></section>
 
-<section id="near"><small>04 · U BLIZINI</small><h2>Sve na par minuta</h2><ul class="poi" id="poi"></ul>
+
+<section id="stan"><div class="hd"><small>04 · STANOVI</small><h2>Izaberi sprat</h2><p>Dodirni sprat na zgradi i pogledaj stanove, kvadraturu, cenu i raspored.</p></div>
+<div class="fac"><div class="in"><img src="ulica_susedi.jpg" alt="Cara Dušana 103, pogled sa ulice"><div id="fls"></div></div></div>
+<div class="tabs" id="tabs"></div><div class="units" id="units"></div>
+<p class="note">Raspored stanova po spratovima i cene su okvirni primer za koncept. Tipovi i kvadrature su iz oglasa.</p></section>
+<div id="modal"><button class="x" id="mx">×</button><img id="mi" alt="Raspored stana"><h3 id="mt"></h3><p id="mp"></p></div>
+
+<section id="near"><small>05 · U BLIZINI</small><h2>Sve na par minuta</h2><ul class="poi" id="poi"></ul>
 <p style="color:var(--mute);font-size:13px;margin-top:14px">Okvirno vreme po vazdušnoj liniji.</p></section>
 <div id="err"></div>
 
@@ -93,6 +124,20 @@ function loop(){pos+=(tgt-pos)*.18;const v=cl(pos/.92),k=Math.round(v*(N-1));if(
   labs[0].style.opacity=pos<.3?1:0;labs[1].style.opacity=pos>=.45&&pos<.85?1:0;labs[2].style.opacity=pos>=.92?1:0;
   document.getElementById('bar2').style.width=(pos*100)+'%';requestAnimationFrame(loop)}
 addEventListener('resize',size);addEventListener('scroll',onS,{passive:true});size();onS();loop();})();
+</script>
+<script>
+(()=>{const PM=2900,eur=n=>n.toLocaleString('de-DE')+' €';
+const T={g24:{n:'Garsonjera',m:24,img:'g24'},g26:{n:'Garsonjera',m:26,img:'g24'},g28:{n:'Garsonjera',m:28,img:'g28'},s32:{n:'Jednoiposobni',m:32,img:'s32'},d52:{n:'Dvosobni',m:52,img:'d52'},d52t:{n:'Dvosobni sa terasom',m:52,img:'d52'}};
+const F=[{k:5,y:15,h:10.4,u:['d52t','d52t','s32']},{k:4,y:25.4,h:11.7,u:['g24','g26','g28','s32','d52']},{k:3,y:37.1,h:11.1,u:['g24','g26','g28','s32','d52']},{k:2,y:48.2,h:11,u:['g24','g26','g28','s32','d52']},{k:1,y:59.2,h:9.8,u:['g24','g26','g28','s32','d52']}];
+const fls=document.getElementById('fls'),tabs=document.getElementById('tabs'),units=document.getElementById('units');
+F.forEach(f=>{const b=document.createElement('button');b.className='fl';b.style.top=f.y+'%';b.style.height=f.h+'%';b.innerHTML='<span>'+f.k+'. sprat</span>';b.onclick=()=>pick(f.k);b.dataset.k=f.k;fls.append(b);
+  const t=document.createElement('button');t.textContent=f.k+'. sprat';t.dataset.k=f.k;t.onclick=()=>pick(f.k);tabs.append(t)});
+function pick(k){const f=F.find(x=>x.k==k);[...fls.children,...tabs.children].forEach(e=>e.classList.toggle('on',e.dataset.k==k));
+  units.innerHTML=f.u.map((id,i)=>{const t=T[id];return '<button class="u" data-id="'+id+'" data-no="'+k+'.'+(i+1)+'"><i>Stan '+k+'.'+(i+1)+'</i><b>'+t.n+'</b><span class="m">'+t.m+' m²</span><span class="p">'+eur(t.m*PM)+'</span><span class="m">Pogledaj raspored →</span></button>'}).join('');
+  units.querySelectorAll('.u').forEach(b=>b.onclick=()=>{const t=T[b.dataset.id];mi.src='plans/'+t.img+'.jpg';mt.textContent='Stan '+b.dataset.no+' · '+t.n;mp.textContent=t.m+' m² · '+eur(t.m*PM)+' (okvirno)';modal.classList.add('on')})}
+const modal=document.getElementById('modal'),mi=document.getElementById('mi'),mt=document.getElementById('mt'),mp=document.getElementById('mp');
+document.getElementById('mx').onclick=()=>modal.classList.remove('on');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('on')};
+pick(3);})();
 </script>
 </body>
 </html>
