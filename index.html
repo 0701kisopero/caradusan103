@@ -57,15 +57,24 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 #modal.on{display:flex}
 #modal img{max-width:100%;max-height:62vh;border-radius:12px;background:#e9ebee;box-shadow:0 12px 40px rgba(20,20,20,.15)}
 #modal h3{margin:16px 0 4px;font-size:30px}#modal p{margin:0;color:var(--mute)}
-#walk{height:700vh;position:relative}#walk .stick{background:var(--bg)}#cv3{width:100%;height:100%;display:block}
-#walk .top{position:absolute;left:16px;right:16px;top:64px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
-#walk .ttl{background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
-#walk .ttl small{color:var(--acc);letter-spacing:.14em;font-size:10.5px;font-weight:600}#walk .ttl b{display:block;font-family:var(--serif);font-size:21px;margin-top:2px}
-#walk .mini{width:92px;border-radius:10px;background:#e9ebee;border:1px solid var(--line);opacity:.95}
-#rooms{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;gap:6px;flex-wrap:wrap;padding:0 12px}
-#rooms span{font:600 12.5px Inter,sans-serif;padding:7px 12px;border-radius:20px;background:rgba(255,253,249,.85);border:1px solid var(--line);color:var(--ink);transition:all .3s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-#rooms span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-#tour{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center}#tour.on{display:flex}#tour video{width:100%;max-height:85vh;background:#000}#tour p{color:var(--mute);font-size:13px;margin:10px 16px}#tour .x{position:absolute;top:14px;right:16px;font-size:28px;background:none;border:0;color:#fff;cursor:pointer;z-index:2}
+#ture{padding:80px 20px 30px;max-width:1000px;margin:0 auto}
+#ture small{color:var(--acc);letter-spacing:.14em;font-size:11px;font-weight:600}#ture h2{margin:8px 0 6px;font-size:40px}#ture>p{margin:0 0 22px;color:var(--mute);line-height:1.5}
+.tc{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font-family:inherit;color:var(--ink);box-shadow:0 10px 30px rgba(20,20,20,.08);transition:transform .25s}
+.card:hover{transform:translateY(-3px)}
+.card .ph{position:relative;aspect-ratio:4/3;background:#ddd center/cover no-repeat}
+.card .ph img{position:absolute;right:12px;bottom:12px;width:34%;border-radius:10px;background:#e9ebee;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.card .bd{padding:16px 18px 18px}.card b{font-family:var(--serif);font-size:28px;font-weight:600;display:block}
+.card .m{color:var(--mute);font-size:14px;display:block;margin:2px 0 12px}.card .go{display:inline-flex;gap:8px;align-items:center;font:600 14px Inter,sans-serif;background:var(--ink);color:#fff;border-radius:24px;padding:10px 18px}
+#tv{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;flex-direction:column}#tv.on{display:flex}
+#tv .tb{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+#tv .tb b{font-family:var(--serif);font-size:24px;font-weight:600}#tv .tb button{font-size:30px;background:none;border:0;color:var(--ink);cursor:pointer;line-height:1}
+#tv .vw{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#111;position:relative}
+#tv video{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}
+#tv .rl{position:absolute;left:16px;top:16px;background:var(--card);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:8px 14px;font-family:var(--serif);font-size:22px;font-weight:600}
+#tv .rm{display:flex;gap:8px;overflow-x:auto;padding:14px 16px calc(14px + env(safe-area-inset-bottom));scrollbar-width:none}
+#tv .rm button{flex:0 0 auto;font:600 14px Inter,sans-serif;padding:11px 16px;border-radius:24px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+#tv .rm button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 #modal .x{position:absolute;top:14px;right:16px;font-size:30px;background:none;border:0;color:var(--ink);cursor:pointer}
 #near{padding:80px 20px 120px;max-width:640px;margin:0 auto}
 #near h2{margin:8px 0 16px;font-size:40px}
@@ -96,11 +105,12 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 <div class="tabs" id="tabs"></div><div class="units" id="units"></div>
 <p class="note">Raspored stanova po spratovima i cene su okvirni primer za koncept. Tipovi i kvadrature su iz oglasa.</p></section>
 <div id="modal"><button class="x" id="mx">×</button><img id="mi" alt="Raspored stana"><h3 id="mt"></h3><p id="mp"></p><button class="btn" id="tourBtn" style="display:none">▶ Prošetaj kroz stan</button></div>
-<div id="tour"><button class="x" id="tx">×</button><video id="tv" playsinline muted preload="none" src="stan52/tura.mp4"></video><p>Dvosobni stan 52 m² · ilustracija enterijera</p></div>
 
-<section id="walk"><div class="stick"><canvas id="cv3"></canvas><div class="bar" id="bar3"></div>
-  <div class="top"><div class="ttl"><small>05 · ŠETNJA KROZ STAN</small><b>Jednoiposobni 32 m²</b></div><img class="mini" src="plans/s32.jpg" alt="Raspored"></div>
-  <div id="rooms"><span>Ulaz</span><span>Kupatilo</span><span>Dnevna i kuhinja</span><span>Spavaća soba</span></div></div></section>
+<section id="ture"><small>05 · PROŠETAJ KROZ STAN</small><h2>Uđi u stan</h2><p>Izaberi stan, pa dodirni sobu u koju želiš da uđeš.</p>
+<div class="tc"><button class="card" data-t="s32"><div class="ph" style="background-image:url(stan32/cover.jpg)"><img src="plans/s32.jpg" alt=""></div><div class="bd"><b>Jednoiposobni</b><span class="m">32 m² · ulaz, kupatilo, dnevna sa kuhinjom, spavaća</span><span class="go">▶ Uđi u stan</span></div></button>
+<button class="card" data-t="d52"><div class="ph" style="background-image:url(stan52/cover.jpg)"><img src="plans/d52.jpg" alt=""></div><div class="bd"><b>Dvosobni sa terasom</b><span class="m">52 m² · dnevna sa kuhinjom i terasom, spavaća</span><span class="go">▶ Uđi u stan</span></div></button></div>
+<p class="note" style="padding:0;margin-top:12px">Enterijer je ilustracija napravljena na osnovu rasporeda.</p></section>
+<div id="tv"><div class="tb"><b id="tvt"></b><button id="tvx" aria-label="Zatvori">×</button></div><div class="vw"><video id="tvv" playsinline muted preload="auto"></video><div class="rl" id="tvr"></div></div><div class="rm" id="tvm"></div></div>
 
 <section id="near"><small>06 · U BLIZINI</small><h2>Sve na par minuta</h2><ul class="poi" id="poi"></ul>
 <p style="color:var(--mute);font-size:13px;margin-top:14px">Okvirno vreme po vazdušnoj liniji.</p></section>
@@ -150,24 +160,26 @@ F.forEach(f=>{const b=document.createElement('button');b.className='fl';b.style.
 function pick(k){const f=F.find(x=>x.k==k);[...fls.children,...tabs.children].forEach(e=>e.classList.toggle('on',e.dataset.k==k));
   units.innerHTML=f.u.map((id,i)=>{const t=T[id];return '<button class="u" data-id="'+id+'" data-no="'+k+'.'+(i+1)+'"><i>Stan '+k+'.'+(i+1)+'</i><b>'+t.n+'</b><span class="m">'+t.m+' m²</span><span class="p">'+eur(t.m*PM)+'</span><span class="m">Pogledaj raspored →</span></button>'}).join('');
   units.querySelectorAll('.u').forEach(b=>b.onclick=()=>{const t=T[b.dataset.id];mi.src='plans/'+t.img+'.jpg';mt.textContent='Stan '+b.dataset.no+' · '+t.n;mp.textContent=t.m+' m² · '+eur(t.m*PM)+' (okvirno)';tb.style.display=(t.img=='d52'||t.img=='s32')?'inline-flex':'none';tb.dataset.t=t.img;modal.classList.add('on')})}
-const tb=document.getElementById('tourBtn'),tour=document.getElementById('tour'),tv=document.getElementById('tv');
-tb.onclick=()=>{modal.classList.remove('on');if(tb.dataset.t=='s32'){document.getElementById('walk').scrollIntoView({behavior:'smooth'});return}tour.classList.add('on');tv.currentTime=0;tv.play()};
-document.getElementById('tx').onclick=()=>{tv.pause();tour.classList.remove('on')};
+const tb=document.getElementById('tourBtn');
+tb.onclick=()=>{modal.classList.remove('on');openTour(tb.dataset.t)};
 const modal=document.getElementById('modal'),mi=document.getElementById('mi'),mt=document.getElementById('mt'),mp=document.getElementById('mp');
 document.getElementById('mx').onclick=()=>modal.classList.remove('on');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('on')};
 pick(3);})();
 </script>
 <script>
-(()=>{const N=197,imgs=[],cv=document.getElementById('cv3'),cx=cv.getContext('2d'),sec=document.getElementById('walk'),rooms=[...document.querySelectorAll('#rooms span')];let cur=-1,loaded=false;
-function load(){if(loaded)return;loaded=true;for(let i=1;i<=N;i++){const im=new Image();im.src='stan32/w'+String(i).padStart(3,'0')+'.jpg';if(i==1)im.onload=()=>{cur=-1};imgs.push(im)}}
-function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
-function draw(k){let m=imgs[k];if(!m||!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j]&&imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
-  if(!m||!m.naturalWidth)return;const W=cv.width,H=cv.height,iw=m.naturalWidth,ih=m.naturalHeight,s=(W/H<1)?Math.max(W/iw,H/ih):Math.min(W/iw,H/ih);
-  cx.fillStyle='#f7f4ee';cx.fillRect(0,0,W,H);cx.drawImage(m,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}
-let tgt=0,pos=0;function onS(){const r=sec.getBoundingClientRect();if(r.top<innerHeight*3)load();tgt=Math.min(1,Math.max(0,-r.top/(r.height-innerHeight)))}
-function loop(){pos+=(tgt-pos)*.15;const k=Math.round(pos*(N-1));if(k!==cur&&imgs.length){cur=k;draw(k)}
-  const ri=pos<.18?0:pos<.42?1:pos<.85?2:3;rooms.forEach((e,i)=>e.classList.toggle('on',i==ri));document.getElementById('bar3').style.width=(pos*100)+'%';requestAnimationFrame(loop)}
-addEventListener('resize',size);addEventListener('scroll',onS,{passive:true});size();onS();loop();})();
+const TOURS={s32:{n:'Jednoiposobni · 32 m²',src:'stan32/tura.mp4',r:[['Ulaz',0],['Kupatilo',4.95],['Dnevna i kuhinja',9.95],['Spavaća soba',14.9]]},
+ d52:{n:'Dvosobni sa terasom · 52 m²',src:'stan52/tura.mp4',r:[['Raspored',0],['Dnevna i kuhinja',4.95],['Spavaća soba',9.9]]}};
+const tvEl=document.getElementById('tv'),tvv=document.getElementById('tvv'),tvm=document.getElementById('tvm'),tvr=document.getElementById('tvr');let TT=null,stopAt=null;
+function setRoom(i){[...tvm.children].forEach((b,j)=>b.classList.toggle('on',j==i));tvr.textContent=TT.r[i][0]}
+function goRoom(i){const t=TT.r[i][1];setRoom(i);if(t>tvv.currentTime+.2){stopAt=t;tvv.play()}else{tvv.pause();stopAt=null;tvv.currentTime=t}}
+(function chk(){if(stopAt!=null&&tvv.currentTime>=stopAt-.06){tvv.pause();stopAt=null}requestAnimationFrame(chk)})();
+function openTour(k){TT=TOURS[k];document.getElementById('tvt').textContent=TT.n;tvv.src=TT.src;tvv.currentTime=0;
+  tvm.innerHTML=TT.r.map((r,i)=>'<button>'+(i==0?'':'→ ')+r[0]+'</button>').join('')+'<button>▶ Cela šetnja</button>';
+  [...tvm.children].forEach((b,i)=>b.onclick=()=>{if(i<TT.r.length)goRoom(i);else{setRoom(0);tvv.currentTime=0;stopAt=null;tvv.play()}});
+  setRoom(0);tvEl.classList.add('on');document.body.style.overflow='hidden';tvv.load()}
+tvv.addEventListener('timeupdate',()=>{if(stopAt==null&&!tvv.paused&&TT){let i=0;TT.r.forEach((r,j)=>{if(tvv.currentTime>=r[1]-.1)i=j});setRoom(i)}});
+document.getElementById('tvx').onclick=()=>{tvv.pause();tvEl.classList.remove('on');document.body.style.overflow=''};
+document.querySelectorAll('.card').forEach(c=>c.onclick=()=>openTour(c.dataset.t));
 </script>
 </body>
 </html>
