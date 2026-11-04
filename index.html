@@ -55,7 +55,18 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
 .u{background:var(--paper);box-shadow:0 4px 18px rgba(20,20,20,.06);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;color:var(--ink);font-family:inherit}
 .u b{font-family:var(--serif);font-size:22px;font-weight:600}.u .m{color:var(--mute);font-size:14px}.u .p{color:var(--acc);font-weight:700;font-size:18px;margin-top:4px}.u i{font-style:normal;font-size:13px;color:var(--ink);opacity:.8}
 .note{max-width:900px;margin:6px auto 0;padding:0 20px;color:var(--mute);font-size:12.5px}
-#modal{position:fixed;inset:0;z-index:40;background:rgba(247,244,238,.97);display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+#pop{position:fixed;inset:0;z-index:45;background:rgba(20,20,20,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center}
+#pop.on{display:flex}
+#pop .pb{background:var(--bg);width:100%;max-width:760px;border-radius:22px 22px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;animation:up .3s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@media (min-width:760px){#pop{align-items:center}#pop .pb{border-radius:22px}}
+#pop .ph{display:flex;justify-content:space-between;align-items:center}#pop .ph b{font-family:var(--serif);font-size:32px;font-weight:600}
+#pop .ph button{font-size:30px;background:none;border:0;color:var(--ink);cursor:pointer}#pop>.pb>p{margin:0 0 14px;color:var(--mute);font-size:14px}
+#pop .pg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pc{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:3px;text-align:left;cursor:pointer;color:var(--ink);font-family:inherit}
+.pc img{width:100%;aspect-ratio:4/3;object-fit:contain;background:#eceef1;border-radius:10px;margin-bottom:6px}
+.pc b{font-family:var(--serif);font-size:20px;font-weight:600}.pc span{color:var(--mute);font-size:13px}.pc em{font-style:normal;font:600 12.5px Inter,sans-serif;margin-top:6px;color:var(--ink)}.pc em.g{color:var(--acc)}
+#modal{position:fixed;inset:0;z-index:48;background:rgba(247,244,238,.97);display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
 #modal.on{display:flex}
 #modal img{max-width:100%;max-height:62vh;border-radius:12px;background:#e9ebee;box-shadow:0 12px 40px rgba(20,20,20,.15)}
 #modal h3{margin:16px 0 4px;font-size:30px}#modal p{margin:0;color:var(--mute)}
@@ -96,16 +107,19 @@ header span{font-size:11px;letter-spacing:.14em;color:var(--acc);border:1px soli
   <div id="hint">SKROLUJ ↓</div></div></section>
 
 <section id="loc"><div class="stick"><canvas id="cv2"></canvas><div class="bar" id="bar2"></div>
-  <div class="lab" id="l1"><small>01 · ZEMUN</small><h2>Cara Dušana, Zemun</h2><p>Nekoliko minuta od Glavne ulice, pijace i Dunava.</p></div>
-  <div class="lab" id="l2"><small>02 · PARCELA</small><h2>Ovde niče zgrada</h2><p>Između postojećih kuća, u ulici Cara Dušana.</p></div>
-  <div class="lab" id="l3"><small>03 · CARA DUŠANA 103</small><h2>Ovde, u ulici Cara Dušana</h2><p>Stambena zgrada P+5 sa unutrašnjim dvorištem i parkingom.</p></div>
+  <div class="lab" id="l1"><small>LOKACIJA · 1/5</small><h2>Zemun, na obali Dunava</h2><p>Najstariji deo Beograda sa dušom malog grada, a samo nekoliko minuta vožnje od Novog Beograda.</p></div>
+  <div class="lab" id="l2"><small>LOKACIJA · 2/5</small><h2>Dunav kao komšija</h2><p>Kej, šetališta, splavovi i zalasci sunca nad rekom, na kratkoj šetnji od kuće.</p></div>
+  <div class="lab" id="l3"><small>LOKACIJA · 3/5</small><h2>Duh starog Zemuna</h2><p>Gardoš kula, kaldrma, Zemunska pijaca i Glavna ulica, sve što život ovde čini posebnim.</p></div>
+  <div class="lab" id="l4"><small>LOKACIJA · 4/5</small><h2>Mirna ulica, sve nadohvat</h2><p>Škole, vrtići, prodavnice i gradski prevoz u neposrednoj blizini.</p></div>
+  <div class="lab" id="l5"><small>LOKACIJA · 5/5 · CARA DUŠANA 103</small><h2>Ovde niče vaš novi dom</h2><p>Stambena zgrada P+5, useljenje septembar 2028.</p></div>
 </div></section>
 
 
-<section id="stan"><div class="hd"><small>04 · STANOVI</small><h2>Poslednji sprat</h2><p>Dodirni poslednji sprat na zgradi i prošetaj kroz stanove na njemu.</p></div>
+<section id="stan"><div class="hd"><small>04 · STANOVI</small><h2>Izaberi sprat</h2><p>Dodirni sprat na zgradi i pogledaj tipove stanova na njemu.</p></div>
 <div class="fac"><div class="in"><img src="ulica_susedi.jpg" alt="Cara Dušana 103, pogled sa ulice"><div id="fls"></div></div></div>
-<div class="units" id="units"></div>
+
 </section>
+<div id="pop"><div class="pb"><div class="ph"><b id="popt"></b><button id="popx" aria-label="Zatvori">×</button></div><p>Tipovi stanova na spratu</p><div class="pg" id="popg"></div></div></div>
 <div id="modal"><button class="x" id="mx">×</button><img id="mi" alt="Raspored stana"><h3 id="mt"></h3><p id="mp"></p><button class="btn" id="tourBtn" style="display:none">▶ Prošetaj kroz stan</button></div>
 
 <section id="ture"><small>05 · PROŠETAJ KROZ STAN</small><h2>Uđi u stan</h2><p>Izaberi stan, pa dodirni sobu u koju želiš da uđeš.</p>
@@ -139,7 +153,7 @@ const POIS=[{n:'Glavna ulica',lat:44.8434,lng:20.4113},{n:'Zemunska pijaca',lat:
 const rad=d=>d*Math.PI/180,cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
 const dist=(a,b)=>{const dl=rad(b.lat-a.lat),dn=rad(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dn/2)**2;return 2*6371000*Math.asin(Math.sqrt(h))};
 document.getElementById('poi').innerHTML=POIS.map(p=>{const d=dist(SITE,p)*1.25;return '<li>'+p.n+'<em>'+(p.car?Math.max(3,Math.round(d/1000/25*60))+' min kolima':Math.max(1,Math.round(d/1000/4.8*60))+' min peške')+'</em></li>'}).join('');
-(()=>{const N=141,imgs=[],cv=document.getElementById('cv2'),cx=cv.getContext('2d'),loc=document.getElementById('loc'),labs=['l1','l2','l3'].map(i=>document.getElementById(i));let cur=-1;
+(()=>{const N=141,imgs=[],cv=document.getElementById('cv2'),cx=cv.getContext('2d'),loc=document.getElementById('loc'),labs=['l1','l2','l3','l4','l5'].map(i=>document.getElementById(i));let cur=-1;
 for(let i=1;i<=N;i++){const im=new Image();im.loading='eager';im.src='zoom/z'+String(i).padStart(3,'0')+'.jpg';imgs.push(im)}
 function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cur=-1}
 function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
@@ -148,19 +162,25 @@ function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0
   const s=(W/H<1)?sc:sf;cx.drawImage(m,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}
 let tgt=0,pos=0;function onS(){const r=loc.getBoundingClientRect();tgt=cl(-r.top/(r.height-innerHeight))}
 function loop(){pos+=(tgt-pos)*.18;const v=cl(pos/.92),k=Math.round(v*(N-1));if(k!==cur){cur=k;draw(k)}
-  labs[0].style.opacity=pos<.3?1:0;labs[1].style.opacity=pos>=.45&&pos<.85?1:0;labs[2].style.opacity=pos>=.92?1:0;
+  const LR=[[0,.16],[.2,.38],[.42,.6],[.64,.84],[.9,1.01]];labs.forEach((l,i)=>l.style.opacity=pos>=LR[i][0]&&pos<LR[i][1]?1:0);
   document.getElementById('bar2').style.width=(pos*100)+'%';requestAnimationFrame(loop)}
 addEventListener('resize',size);addEventListener('scroll',onS,{passive:true});size();onS();loop();})();
 </script>
 <script>
 (()=>{const PM=2900,eur=n=>n.toLocaleString('de-DE')+' €';
 const T={g24:{n:'Garsonjera',m:24,img:'g24'},g26:{n:'Garsonjera',m:26,img:'g24'},g28:{n:'Garsonjera',m:28,img:'g28'},s32:{n:'Jednoiposobni',m:32,img:'s32'},d52:{n:'Dvosobni',m:52,img:'d52'},d52t:{n:'Dvosobni sa terasom',m:52,img:'d52'}};
-const F=[{k:5,y:15,h:10.4,u:['s32','d52t']}];
-const fls=document.getElementById('fls'),units=document.getElementById('units');
-F.forEach(f=>{const b=document.createElement('button');b.className='fl hint';b.style.top=f.y+'%';b.style.height=f.h+'%';b.innerHTML='<span>Poslednji sprat · dodirni</span>';b.onclick=()=>pick(f.k);b.dataset.k=f.k;fls.append(b)});
-function pick(k){const f=F.find(x=>x.k==k);[...fls.children].forEach(e=>{e.classList.add('on');e.classList.remove('hint');e.querySelector('span').textContent='Poslednji sprat'});
-  units.innerHTML=f.u.map((id,i)=>{const t=T[id];return '<button class="u" data-t="'+t.img+'"><i>Poslednji sprat</i><b>'+t.n+'</b><span class="m">'+t.m+' m²</span><span class="p" style="color:var(--ink);font-size:15px">▶ Prošetaj kroz stan</span></button>'}).join('');
-  units.querySelectorAll('.u').forEach(b=>b.onclick=()=>openTour(b.dataset.t));units.scrollIntoView({behavior:'smooth',block:'nearest'})}
+const F=[{k:5,y:15,h:10.4},{k:4,y:25.4,h:11.7},{k:3,y:37.1,h:11.1},{k:2,y:48.2,h:11},{k:1,y:59.2,h:9.8}];
+const TY=[{n:'Garsonjera',m:'24–26 m²',img:'g24'},{n:'Garsonjera',m:'28 m²',img:'g28'},{n:'Jednoiposobni',m:'32 m²',img:'s32',t:1},{n:'Dvosobni',m:'do 52 m²',img:'d52',t:1}];
+const fls=document.getElementById('fls'),pop=document.getElementById('pop'),pg=document.getElementById('popg');
+F.forEach(f=>{const b=document.createElement('button');b.className='fl'+(f.k==3?' hint':'');b.style.top=f.y+'%';b.style.height=f.h+'%';b.innerHTML='<span>'+f.k+'. sprat</span>';b.onclick=()=>pick(f.k);b.dataset.k=f.k;fls.append(b)});
+function pick(k){[...fls.children].forEach(e=>{e.classList.remove('hint');e.classList.toggle('on',e.dataset.k==k)});
+  document.getElementById('popt').textContent=k+'. sprat';
+  pg.innerHTML=TY.map(t=>'<button class="pc" data-img="'+t.img+'" data-t="'+(t.t?1:'')+'"><img src="plans/'+t.img+'.jpg" alt=""><b>'+t.n+'</b><span>'+t.m+'</span>'+(t.t?'<em>▶ Prošetaj kroz stan</em>':'<em class="g">Pogledaj raspored</em>')+'</button>').join('');
+  pg.querySelectorAll('.pc').forEach(b=>b.onclick=()=>{if(b.dataset.t){pop.classList.remove('on');openTour(b.dataset.img)}else{const t=TY.find(x=>x.img==b.dataset.img);mi.src='plans/'+t.img+'.jpg';mt.textContent=t.n+' · '+t.m;mp.textContent=k+'. sprat';modal.classList.add('on')}});
+  pop.classList.add('on')}
+document.getElementById('popx').onclick=()=>pop.classList.remove('on');pop.onclick=e=>{if(e.target===pop)pop.classList.remove('on')};
+const modal=document.getElementById('modal'),mi=document.getElementById('mi'),mt=document.getElementById('mt'),mp=document.getElementById('mp');
+document.getElementById('mx').onclick=()=>modal.classList.remove('on');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('on')};
 })();
 </script>
 <script>
