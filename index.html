@@ -97,7 +97,7 @@ footer{background:var(--ink);color:#8d877c;font-size:12.5px;text-align:center;pa
 #tv{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;flex-direction:column}#tv.on{display:flex}
 #tv .tb{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
 #tv .tb b{font-family:var(--serif);font-size:24px;font-weight:600}#tv .tb button{font-size:30px;background:none;border:0;color:var(--ink);cursor:pointer;line-height:1}
-#tv .vw{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#111;position:relative}
+#tv .vw{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#1a1814;position:relative}
 #tv video{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}
 #tv .rl{position:absolute;left:16px;top:16px;background:var(--card);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:8px 14px;font-family:var(--serif);font-size:22px;font-weight:600}
 #tv .rm{display:flex;gap:8px;overflow-x:auto;padding:14px 16px calc(14px + env(safe-area-inset-bottom));scrollbar-width:none}
@@ -188,7 +188,12 @@ function size(){const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv
 function draw(k){let m=imgs[k];if(!m.complete||!m.naturalWidth){for(let j=k;j>=0;j--)if(imgs[j].complete&&imgs[j].naturalWidth){m=imgs[j];break}}
   if(!m||!m.naturalWidth)return;const W=cv.width,H=cv.height,iw=m.naturalWidth,ih=m.naturalHeight,sc=Math.max(W/iw,H/ih),sf=Math.min(W/iw,H/ih);
   cx.fillStyle='#f7f4ee';cx.fillRect(0,0,W,H);
-  const s=(W/H<1)?sc:sf;cx.drawImage(m,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}
+  if(W/H<1){cx.drawImage(m,(W-iw*sc)/2,(H-ih*sc)/2,iw*sc,ih*sc);return}
+  if(typeof cx.filter==='string'){cx.filter='blur(40px) saturate(1.1)';cx.drawImage(m,(W-iw*sc*1.1)/2,(H-ih*sc*1.1)/2,iw*sc*1.1,ih*sc*1.1);cx.filter='none'}
+  else{const bw=24,bh=Math.round(24*H/W);if(!window._bc){window._bc=document.createElement('canvas');window._bc2=document.createElement('canvas')}const bc=window._bc,b2=window._bc2;bc.width=bw;bc.height=bh;const bx=bc.getContext('2d'),bs=Math.max(bw/iw,bh/ih);
+  bx.drawImage(m,(bw-iw*bs)/2,(bh-ih*bs)/2,iw*bs,ih*bs);b2.width=bw*4;b2.height=bh*4;const b2x=b2.getContext('2d');b2x.imageSmoothingQuality='high';b2x.drawImage(bc,0,0,b2.width,b2.height);cx.imageSmoothingQuality='high';cx.drawImage(b2,0,0,W,H)}
+  cx.fillStyle='rgba(20,18,14,.28)';cx.fillRect(0,0,W,H);
+  const w=iw*sf,h=ih*sf;cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=60;cx.drawImage(m,(W-w)/2,(H-h)/2,w,h);cx.shadowBlur=0}
 let tgt=0,pos=0;function onS(){const r=loc.getBoundingClientRect();tgt=cl(-r.top/(r.height-innerHeight))}
 function loop(){pos+=(tgt-pos)*.18;const v=cl(pos/.92),k=Math.round(v*(N-1));if(k!==cur){cur=k;draw(k)}
   const LR=[[0,.16],[.2,.38],[.42,.6],[.64,.84],[.9,1.01]];labs.forEach((l,i)=>l.style.opacity=pos>=LR[i][0]&&pos<LR[i][1]?1:0);
